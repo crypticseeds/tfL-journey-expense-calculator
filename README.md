@@ -357,9 +357,8 @@ This project demonstrates my ability to:
 
 **Looking for an AI Engineer or Full-Stack Developer?** Let's talk!
 
-📧 **Contact**: [your.email@example.com](mailto:femi.akinlotan@devopsfoundry.com)  
-💼 **LinkedIn**: [linkedin.com/in/yourprofile](https://www.linkedin.com/in/femi-akinlotan/)  
-
+📧 **Contact**: [femi.akinlotan@devopsfoundry.com](mailto:femi.akinlotan@devopsfoundry.com)  
+💼 **LinkedIn**: [https://www.linkedin.com/in/femi-akinlotan/](https://www.linkedin.com/in/femi-akinlotan/)  
 
 ### Tech Stack Expertise
 
