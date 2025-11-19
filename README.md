@@ -357,10 +357,9 @@ This project demonstrates my ability to:
 
 **Looking for an AI Engineer or Full-Stack Developer?** Let's talk!
 
-📧 **Contact**: [your.email@example.com](mailto:your.email@example.com)  
-💼 **LinkedIn**: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)  
-🐙 **GitHub**: [github.com/yourusername](https://github.com/yourusername)  
-🌐 **Portfolio**: [yourportfolio.com](https://yourportfolio.com)
+📧 **Contact**: [your.email@example.com](mailto:femi.akinlotan@devopsfoundry.com)  
+💼 **LinkedIn**: [linkedin.com/in/yourprofile](https://www.linkedin.com/in/femi-akinlotan/)  
+
 
 ### Tech Stack Expertise
 
@@ -376,5 +375,3 @@ This project demonstrates my ability to:
 **⭐ If you found this project interesting, please star the repo!**
 
 It helps others discover this work and shows recruiters that developers find value in these solutions.
-
-> 💡 **Note**: Update the placeholder links above with your actual contact information before sharing with recruiters.
