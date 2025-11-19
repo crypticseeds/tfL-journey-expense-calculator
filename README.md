@@ -168,35 +168,8 @@ doppler login
 doppler setup
 
 # Run with Doppler
-pnpm run dev:all:doppler
+doppler run -- pnpm run dev
 ```
-
-**Doppler configuration**:
-
-```bash
-# Backend variables
-GEMINI_API_KEY=your-key
-   PORT=3001
-   FRONTEND_ORIGIN=http://localhost:3000
-
-# Frontend variables (must be VITE_ prefixed)
-   VITE_API_BASE_URL=http://localhost:3001
-
-# Langfuse (optional)
-   LANGFUSE_PUBLIC_KEY=pk-lf-...
-   LANGFUSE_SECRET_KEY=sk-lf-...
-   LANGFUSE_BASE_URL=https://cloud.langfuse.com
-   ```
-
-### Running Services Separately
-   
-   ```bash
-   # Terminal 1: Backend
-   pnpm run dev:server
-   
-   # Terminal 2: Frontend
-   pnpm run dev
-   ```
 
 ## 📋 How It Works
 
@@ -258,37 +231,6 @@ This project implements **enterprise-grade security** for API key protection:
 1. Get a valid key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Ensure no extra spaces in your `.env` file
 3. Restart the backend server after updating the key
-
-## 🚀 Deployment
-
-Ready for production? Here's how to deploy:
-
-### Environment Variables for Production
-
-   ```bash
-# Backend
-GEMINI_API_KEY=your-production-key
-PORT=3001
-FRONTEND_ORIGIN=https://yourdomain.com
-
-# Frontend (build time)
-VITE_API_BASE_URL=https://api.yourdomain.com
-
-# Langfuse (optional)
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com
-```
-
-### Build Commands
-```bash
-# Backend (Node.js)
-node server/index.js
-
-# Frontend
-pnpm build       # Creates optimized production build
-pnpm preview     # Test the production build locally
-```
 
 ### Deployment Platforms
 This app can be deployed to:
