@@ -45,14 +45,14 @@ An intelligent expense calculator that:
 
 ## 💡 Why This Project Matters
 
-This isn't just another CRUD app—it's a **production-ready AI agent** solving a real business problem. Built to demonstrate:
+This isn't just another CRUD app it's a **production-ready AI agent** solving a real problem. Built to demonstrate:
 
 - ✨ **Real-world AI application**: Not a tutorial project, but a tool people actually need
 - 🏗️ **Production engineering**: Complete with observability, security, and error handling
 - 🎯 **Problem-first approach**: Starting with user pain points, not tech
 - 📈 **Scalable architecture**: Ready for real-world deployment and usage
 
-Perfect for employees at companies with transport reimbursement policies—saves hours of manual work every month.
+Perfect for employees at companies with transport reimbursement policies, saves hours of manual work every month.
 
 ## 🧠 Technical Showcase
 
