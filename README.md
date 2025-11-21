@@ -310,7 +310,7 @@ This project demonstrates my ability to:
 
 **⭐ If you found this project interesting, please star the repo!**
 
-**Looking for an AI Engineer or Full-Stack Developer?** Let's talk!
+---
 
 <div align="center">
 
