@@ -297,11 +297,6 @@ This project demonstrates my ability to:
 - **Write clean, maintainable code** following industry best practices
 - **Think about the entire stack** from UX to deployment
 
-**Looking for an AI Engineer or Full-Stack Developer?** Let's talk!
-
-📧 **Contact**: [femi.akinlotan@devopsfoundry.com](mailto:femi.akinlotan@devopsfoundry.com)  
-💼 **LinkedIn**: [https://www.linkedin.com/in/femi-akinlotan/](https://www.linkedin.com/in/femi-akinlotan/)  
-
 ### Tech Stack Expertise
 
 **Languages**: TypeScript, JavaScript, Python  
@@ -315,4 +310,15 @@ This project demonstrates my ability to:
 
 **⭐ If you found this project interesting, please star the repo!**
 
-It helps others discover this work and shows recruiters that developers find value in these solutions.
+**Looking for an AI Engineer or Full-Stack Developer?** Let's talk!
+
+<div align="center">
+
+### 🔗 Connect with Me
+
+[![Portfolio](https://img.shields.io/badge/Portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://devopsfoundry.com/projects/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/femi-akinlotan/)
+[![Mail](https://img.shields.io/badge/Email-lightgrey?style=for-the-badge&logo=minutemailer&logoColor=white)](femi.akinlotan@devopsfoundry.com)
+
+
+**Built with ❤️ by Femi Akinlotan**
