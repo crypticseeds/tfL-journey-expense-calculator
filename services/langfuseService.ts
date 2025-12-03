@@ -21,9 +21,14 @@ export const startExpenseTrace = <T>(
   userId?: string,
   metadata?: Record<string, string>
 ) => {
-  return async (operation: (rootSpan: any) => Promise<T>): Promise<T> => {
+  return async (
+    operation: (rootSpan: {
+      startObservation: (name: string, opts: unknown) => unknown;
+      update: (data: unknown) => void;
+    }) => Promise<T>
+  ): Promise<T> => {
     await ensureInitialized();
-    
+
     return await startActiveObservation(
       "process-tfl-journey-statement",
       async (span) => {
@@ -36,9 +41,11 @@ export const startExpenseTrace = <T>(
             {
               sessionId,
               userId,
-              metadata: metadata ? Object.fromEntries(
-                Object.entries(metadata).map(([k, v]) => [k, String(v)])
-              ) : undefined,
+              metadata: metadata
+                ? Object.fromEntries(
+                    Object.entries(metadata).map(([k, v]) => [k, String(v)])
+                  )
+                : undefined,
               tags: ["expense-calculator", "gemini"],
             },
             async () => {
@@ -46,8 +53,9 @@ export const startExpenseTrace = <T>(
                 const result = await operation(span);
                 span.update({ output: { success: true } });
                 return result;
-              } catch (error: any) {
-                span.update({ output: { error: error.message } });
+              } catch (error: unknown) {
+                const err = error as Error;
+                span.update({ output: { error: err.message } });
                 throw error;
               }
             }
@@ -57,8 +65,9 @@ export const startExpenseTrace = <T>(
             const result = await operation(span);
             span.update({ output: { success: true } });
             return result;
-          } catch (error: any) {
-            span.update({ output: { error: error.message } });
+          } catch (error: unknown) {
+            const err = error as Error;
+            span.update({ output: { error: err.message } });
             throw error;
           }
         }
@@ -73,23 +82,41 @@ export const startExpenseTrace = <T>(
 export const traceGeminiCall = async <T>(
   name: string,
   model: string,
-  input: any,
+  input: unknown,
   apiCall: () => Promise<T>,
   metadata?: Record<string, string>,
-  parent?: any
+  parent?: {
+    startObservation: (
+      name: string,
+      opts: unknown,
+      options?: unknown
+    ) => { update: (data: unknown) => void; end: () => void };
+  }
 ): Promise<T> => {
   await ensureInitialized();
-  
-  const createObservation = parent 
-    ? (name: string, callback: any, opts: any) => {
-        const child = parent.startObservation(name, { model, input, metadata: { ...metadata, service: "gemini-service" } }, opts);
+
+  const createObservation = parent
+    ? (
+        name: string,
+        callback: (span: { update: (data: unknown) => void }) => Promise<T>,
+        opts?: unknown
+      ) => {
+        const child = parent.startObservation(
+          name,
+          {
+            model,
+            input,
+            metadata: { ...metadata, service: "gemini-service" },
+          },
+          opts
+        );
         return callback(child).finally(() => child.end());
       }
     : startActiveObservation;
-  
+
   return await createObservation(
     name,
-    async (span: any) => {
+    async (span: { update: (data: unknown) => void }) => {
       span.update({
         model,
         input,
@@ -100,24 +127,34 @@ export const traceGeminiCall = async <T>(
         const startTime = Date.now();
         const result = await apiCall();
         const duration = Date.now() - startTime;
-        
-        let output: any;
-        let usageDetails: any = undefined;
-        
-        if (typeof result === 'object' && result !== null) {
-          if ('usageMetadata' in result) {
-            const usage = (result as any).usageMetadata;
+
+        let output: unknown;
+        let usageDetails:
+          | { input: number; output: number; total: number }
+          | undefined = undefined;
+
+        if (typeof result === "object" && result !== null) {
+          const resultObj = result as Record<string, unknown>;
+          if ("usageMetadata" in resultObj) {
+            const usage = resultObj.usageMetadata as {
+              promptTokenCount?: number;
+              candidatesTokenCount?: number;
+              totalTokenCount?: number;
+            };
             usageDetails = {
               input: usage.promptTokenCount || 0,
-              output: usage.candidatesTokenCount || usage.totalTokenCount - (usage.promptTokenCount || 0) || 0,
+              output:
+                usage.candidatesTokenCount ||
+                (usage.totalTokenCount || 0) - (usage.promptTokenCount || 0) ||
+                0,
               total: usage.totalTokenCount || 0,
             };
           }
-          
-          if ('text' in result) {
-            output = { text: (result as any).text };
-          } else if ('response' in result) {
-            output = { response: (result as any).response };
+
+          if ("text" in resultObj) {
+            output = { text: resultObj.text };
+          } else if ("response" in resultObj) {
+            output = { response: resultObj.response };
           } else {
             output = result;
           }
@@ -137,9 +174,10 @@ export const traceGeminiCall = async <T>(
         });
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as Error;
         span.update({
-          output: { error: error.message },
+          output: { error: err.message },
           metadata: { ...metadata, service: "gemini-service", status: "error" },
         });
         throw error;
@@ -154,31 +192,61 @@ export const traceGeminiCall = async <T>(
  */
 export const traceFileProcessing = async <T>(
   name: string,
-  input: any,
-  operation: (parent?: any) => Promise<T>,
+  input: unknown,
+  operation: (parent?: {
+    startObservation: (
+      name: string,
+      opts: unknown
+    ) => { update: (data: unknown) => void; end: () => void };
+  }) => Promise<T>,
   metadata?: Record<string, string>,
-  parent?: any
+  parent?: {
+    startObservation: (
+      name: string,
+      opts: unknown
+    ) => { update: (data: unknown) => void; end: () => void };
+  }
 ): Promise<T> => {
   await ensureInitialized();
-  
+
   const createObservation = parent
-    ? (name: string, callback: any) => {
+    ? (
+        name: string,
+        callback: (span: {
+          update: (data: unknown) => void;
+          end: () => void;
+        }) => Promise<T>
+      ) => {
         const child = parent.startObservation(name, { input, metadata });
         return callback(child).finally(() => child.end());
       }
     : startActiveObservation;
-  
+
   return await createObservation(
     name,
-    async (span: any) => {
+    async (span: { update: (data: unknown) => void }) => {
       span.update({ input, metadata });
 
       try {
-        const result = await operation(span);
-        span.update({ output: result, metadata: { ...metadata, status: "success" } });
+        const result = await operation(
+          span as unknown as {
+            startObservation: (
+              name: string,
+              opts: unknown
+            ) => { update: (data: unknown) => void; end: () => void };
+          }
+        );
+        span.update({
+          output: result,
+          metadata: { ...metadata, status: "success" },
+        });
         return result;
-      } catch (error: any) {
-        span.update({ output: { error: error.message }, metadata: { ...metadata, status: "error" } });
+      } catch (error: unknown) {
+        const err = error as Error;
+        span.update({
+          output: { error: err.message },
+          metadata: { ...metadata, status: "error" },
+        });
         throw error;
       }
     }
