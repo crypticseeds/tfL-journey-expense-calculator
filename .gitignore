@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
@@ -16,14 +17,90 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+.env.test
+.env.staging
+.env.*.backup
+*.env
+*.env.*
+doppler.yaml
+doppler.toml
+
+# Secrets and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cert
+*.secret
+*.credentials
+*secret*
+*credential*
+*password*
+*token*
+*api-key*
+*apikey*
+secrets/
+credentials/
+*.gpg
+*.asc
+
+# Backup files (may contain secrets)
+*.backup
+*.bak
+*.old
+*.orig
+*.tmp
+*.temp
+*~
+
+# Cache and temporary files
+.cache
+.parcel-cache
+.vite
+.turbo
+.next
+.nuxt
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Linting, formatting, and pre-commit tool cache/generated files
+.eslintcache
+.prettiercache
+.husky/_/husky.sh.local
+.husky/_/install.mjs.local
+
+# Linting, formatting, and pre-commit tool cache/generated files
+.eslintcache
+.prettiercache
+.husky/_/husky.sh.local
+.husky/_/install.mjs.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
+*.swp
+*.swo
+*.swn
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Project specific
+blog.md

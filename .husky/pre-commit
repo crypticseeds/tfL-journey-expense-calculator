@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged to format and lint staged files
+pnpm exec lint-staged
+
+# Run type-check (checks entire project, fails commit if errors found)
+pnpm type-check
