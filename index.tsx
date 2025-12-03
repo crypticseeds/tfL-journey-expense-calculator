@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 // Initialize Langfuse instrumentation early (non-blocking)
-import "./services/langfuseInstrumentation";
+import "./services/langfuseService";
 import App from "./App";
 
 const rootElement = document.getElementById("root");

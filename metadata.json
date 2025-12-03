@@ -1,4 +1,0 @@
-{
-  "name": "TFL Journey Expense Calculator",
-  "description": "An application to upload Transport for London (TFL) statements (PDF, CSV, or images), extract journey data using Gemini, and calculate total travel costs for user-selected workdays."
-}
