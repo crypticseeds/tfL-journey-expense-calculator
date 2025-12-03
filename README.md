@@ -24,6 +24,7 @@
 ## 🎯 The Problem
 
 As an employee claiming transport reimbursement, calculating your monthly travel expenses is a **time-consuming nightmare**:
+
 - Manually matching journey dates with work days across multiple months
 - Cross-referencing invoices with actual work days
 - Calculating costs from multiple TfL statements
@@ -34,6 +35,7 @@ As an employee claiming transport reimbursement, calculating your monthly travel
 ## ✨ The Solution
 
 An intelligent expense calculator that:
+
 - 📤 **Accepts multiple file formats**: Upload CSV invoices, PDF statements, or even images
 - 🤖 **AI-powered extraction**: Uses Google Gemini to intelligently parse and understand your transport data
 - 📅 **Visual date selection**: Simple, intuitive calendar UI to select days you actually worked
@@ -59,21 +61,24 @@ Perfect for employees at companies with transport reimbursement policies, saves 
 This project demonstrates advanced skills in **AI agent development** and **production-grade engineering**:
 
 ### AI Agent Architecture
+
 - **Intelligent document parsing** using Google Gemini with structured prompts
 - **Multi-modal AI processing** (text, PDF, images via OCR)
 - **Context-aware data extraction** that understands TfL invoice formats
 - **Structured output validation** ensuring data integrity
 
 ### Production Observability
+
 Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring:
 
 ![Langfuse Tracing - Workflow](images/tracing-1.png)
-*End-to-end trace showing the complete expense calculation workflow*
+_End-to-end trace showing the complete expense calculation workflow_
 
 ![Langfuse Tracing - AI Calls](images/tracing-2.png)
-*Detailed AI model observability with token usage, latency, and cost tracking*
+_Detailed AI model observability with token usage, latency, and cost tracking_
 
 ### Enterprise Security
+
 - **Zero client-side API key exposure** via secure backend proxy
 - **CORS protection** and rate limiting
 - **Production-ready architecture** with environment-based configuration
@@ -81,6 +86,7 @@ Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 19** - Latest React with modern features
 - **TypeScript** - Type-safe development
 - **Vite** - Lightning-fast build tool
@@ -88,12 +94,14 @@ Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring
 - **Tesseract.js** - OCR for image-based invoices
 
 ### Backend
+
 - **Node.js + Express** - Secure API proxy server
 - **Google Gemini AI** - Advanced multimodal AI
 - **Langfuse** - Production AI observability
 - **OpenTelemetry** - Distributed tracing
 
 ### DevOps & Tooling
+
 - **pnpm** - Fast, efficient package manager
 - **Doppler** - Secure secrets management
 - **Concurrently** - Multi-process orchestration
@@ -101,6 +109,7 @@ Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js (v18+)
 - pnpm (or npm)
 - Google Gemini API key ([Get one free](https://aistudio.google.com/app/apikey))
@@ -108,6 +117,7 @@ Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring
 ### Installation
 
 1. **Clone and install**:
+
    ```bash
    git clone https://github.com/yourusername/tfl-journey-expense-calculator.git
    cd tfl-journey-expense-calculator
@@ -115,19 +125,21 @@ Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring
    ```
 
 2. **Configure environment**:
-   
+
    Create a `.env` file:
+
    ```bash
    # Required: Google Gemini API Key
    GEMINI_API_KEY=your-gemini-api-key-here
-   
+
    # Optional: Langfuse for AI observability (recommended)
    LANGFUSE_PUBLIC_KEY=pk-lf-...
    LANGFUSE_SECRET_KEY=sk-lf-...
    LANGFUSE_BASE_URL=https://cloud.langfuse.com
    ```
-   
+
 3. **Run the application**:
+
    ```bash
    pnpm run dev:all
    ```
@@ -141,10 +153,12 @@ That's it! 🎉
 ## 🎬 Try It Out
 
 The project includes sample TfL statements in the `/sample` folder:
+
 - `Amex - 2003 - October 2025 (Journeys).pdf` - Sample journey PDF
 - `Amex - 2003 - October 2025 (Payments).csv` - Sample payment CSV
 
 **Quick walkthrough**:
+
 1. Open `http://localhost:3000`
 2. Click "Upload Files" and select the sample files
 3. Select some dates in October 2025 on the calendar
@@ -159,7 +173,7 @@ Check the Langfuse dashboard (if configured) to see the full AI trace!
 
 Doppler provides secure, centralized secret management:
 
-   ```bash
+```bash
 # Install Doppler CLI
 brew install doppler  # or see https://docs.doppler.com/docs/install-cli
 
@@ -179,6 +193,7 @@ doppler run -- pnpm run dev
 4. **Export the summary** for your finance team
 
 The AI agent intelligently:
+
 - Extracts journey data from multiple formats
 - Matches journeys to your work days
 - Handles multiple invoices across different months
@@ -189,6 +204,7 @@ The AI agent intelligently:
 This project showcases **production-grade AI monitoring** using Langfuse:
 
 ### What's Tracked
+
 - ✅ **Complete workflow traces** - See the entire expense calculation process
 - ✅ **AI model calls** - Full Gemini API request/response details
 - ✅ **Performance metrics** - Latency, token usage, and estimated costs
@@ -196,6 +212,7 @@ This project showcases **production-grade AI monitoring** using Langfuse:
 - ✅ **Session grouping** - Group related operations for debugging
 
 ### Setup (Optional but Recommended)
+
 1. Sign up for free at [cloud.langfuse.com](https://cloud.langfuse.com)
 2. Get your API keys from the dashboard
 3. Add them to your `.env` file
@@ -211,7 +228,7 @@ This project implements **enterprise-grade security** for API key protection:
 ✅ **Zero Client Exposure**: API keys never touch the browser  
 ✅ **CORS Protection**: Only configured origins can access the API  
 ✅ **Rate Limiting**: 30 requests/minute per IP to prevent abuse  
-✅ **Production Ready**: Designed for HTTPS deployment  
+✅ **Production Ready**: Designed for HTTPS deployment
 
 **Health Check**: Visit `http://localhost:3001/health` to verify the backend is running.
 
@@ -220,6 +237,7 @@ This project implements **enterprise-grade security** for API key protection:
 **Issue**: "Failed to fetch" or "Cannot connect to backend"
 
 **Solutions**:
+
 1. Ensure backend is running: `pnpm run dev:server`
 2. Check `http://localhost:3001/health` returns `{"status":"ok"}`
 3. Verify `GEMINI_API_KEY` is set in `.env`
@@ -228,18 +246,22 @@ This project implements **enterprise-grade security** for API key protection:
 **Issue**: "Invalid API key" error
 
 **Solutions**:
+
 1. Get a valid key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Ensure no extra spaces in your `.env` file
 3. Restart the backend server after updating the key
 
 ### Deployment Platforms
+
 This app can be deployed to:
+
 - **Vercel** (frontend) + **Railway** (backend)
 - **Netlify** (frontend) + **Render** (backend)
 - **AWS** (S3 + Lambda/EC2)
 - **Docker** (containerized deployment)
 
 **Security Checklist for Production:**
+
 - ✅ Use HTTPS for all connections
 - ✅ Set `FRONTEND_ORIGIN` to your actual domain
 - ✅ Rotate API keys regularly
@@ -251,24 +273,28 @@ This app can be deployed to:
 This project showcases expertise in:
 
 ### AI/ML Engineering
+
 - Prompt engineering for structured data extraction
 - Multi-modal AI (text, PDF, images)
 - AI agent workflow design
 - Production AI monitoring and observability
 
 ### Full-Stack Development
+
 - Modern React with TypeScript
 - RESTful API design
 - Security-first architecture
 - Client-server communication
 
 ### DevOps & Best Practices
+
 - Environment management (Doppler)
 - Distributed tracing (OpenTelemetry)
 - Error handling and validation
 - Production-ready code structure
 
 ### Problem Solving
+
 - Real-world automation of manual processes
 - User-centric design
 - Performance optimization
@@ -291,6 +317,7 @@ Built by **Femi** as a portfolio piece to showcase real-world AI engineering cap
 ### What This Project Represents
 
 This project demonstrates my ability to:
+
 - **Identify real problems** and build practical AI solutions
 - **Engineer production-grade systems** with proper monitoring and security
 - **Integrate cutting-edge AI** (Google Gemini) into full-stack applications
@@ -319,6 +346,5 @@ This project demonstrates my ability to:
 [![Portfolio](https://img.shields.io/badge/Portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://devopsfoundry.com/projects/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/femi-akinlotan/)
 [![Mail](https://img.shields.io/badge/Email-lightgrey?style=for-the-badge&logo=minutemailer&logoColor=white)](mailto:femi.akinlotan@devopsfoundry.com)
-
 
 **Built with ❤️ by Femi Akinlotan**
