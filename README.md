@@ -88,7 +88,7 @@ _Langfuse trace revealing document processing bottlenecks, leading to 78.5% late
 1. **Clone and install**:
 
    ```bash
-   git clone https://github.com/yourusername/tfl-journey-expense-calculator.git
+   git clone https://github.com/crypticseeds/tfl-journey-expense-calculator.git
    cd tfl-journey-expense-calculator
    pnpm install
    ```
