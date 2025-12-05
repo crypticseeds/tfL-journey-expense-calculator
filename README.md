@@ -1,4 +1,4 @@
-# 🚇 TfL Journey Expense Calculator
+# 🚇 TFL Journey Expense Calculator
 
 > **An AI-powered expense automation tool that transforms the tedious process of calculating transport reimbursements into a simple, intelligent workflow.**
 
