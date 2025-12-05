@@ -346,16 +346,25 @@ function parseCsvToTravelEntries(text: string): TravelEntry[] {
     if (cols.length < 2) continue;
     // try first col as date
     let date = toISODate(cols[0]);
-    // find amount in remaining cols
+    if (!date) continue; // Skip if date is invalid
+
+    // find amount in remaining cols (skip first column which is the date)
     let amount: number | null = null;
-    for (let j = cols.length - 1; j >= 0; j--) {
-      const match = cols[j].match(/-?\s*£?\s*(\d+(?:\.\d{2})?)\s*$/);
-      if (match) {
-        amount = parseFloat(match[1]);
-        break;
+    for (let j = 1; j < cols.length; j++) {
+      const col = cols[j].trim();
+      // Match numbers (positive or negative), extract the numeric value
+      // Handles: "-7.2", "7.2", "- 7.2", "£7.2", "-£7.2", etc.
+      const match = col.match(/^[-]?\s*£?\s*(\d+(?:\.\d{1,2})?)\s*$/);
+      if (match && match[1]) {
+        const parsedAmount = parseFloat(match[1]);
+        // Ensure we have a valid positive number
+        if (!isNaN(parsedAmount) && parsedAmount > 0) {
+          amount = parsedAmount;
+          break; // Use first matching amount found
+        }
       }
     }
-    if (date && amount !== null && !isNaN(amount)) {
+    if (date && amount !== null && !isNaN(amount) && amount > 0) {
       out.push({ date, amount });
     }
   }

@@ -7,23 +7,11 @@
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Langfuse](https://img.shields.io/badge/Langfuse-Observability-000000?style=flat)](https://langfuse.com/)
 
-![TfL Journey Expense Calculator - Home](images/home.png)
-
-## 📑 Table of Contents
-
-- [The Problem](#-the-problem)
-- [The Solution](#-the-solution)
-- [Technical Showcase](#-technical-showcase)
-- [Tech Stack](#️-tech-stack)
-- [Quick Start](#-quick-start)
-- [AI Observability](#-ai-observability-with-langfuse)
-- [Security Architecture](#-security-architecture)
-- [Deployment](#-deployment)
-- [Skills Demonstrated](#-skills-demonstrated)
+![TfL Journey Expense Calculator](images/tfl-home-page.png)
 
 ## 🎯 The Problem
 
-As an employee claiming transport reimbursement, calculating your monthly travel expenses is a **time-consuming nightmare**:
+As an employee claiming transport reimbursement, calculating monthly travel expenses is a **time-consuming nightmare**:
 
 - Manually matching journey dates with work days across multiple months
 - Cross-referencing invoices with actual work days
@@ -36,14 +24,14 @@ As an employee claiming transport reimbursement, calculating your monthly travel
 
 An intelligent expense calculator that:
 
-- 📤 **Accepts multiple file formats**: Upload CSV invoices, PDF statements, or even images
-- 🤖 **AI-powered extraction**: Uses Google Gemini to intelligently parse and understand your transport data
-- 📅 **Visual date selection**: Simple, intuitive calendar UI to select days you actually worked
-- 💰 **Automatic calculation**: Instantly computes your total reimbursement amount
+- 📤 **Accepts multiple file formats**: Upload CSV invoices, PDF statements, or images
+- 🤖 **AI-powered extraction**: Uses Google Gemini to intelligently parse transport data
+- 📅 **Visual date selection**: Simple calendar UI to select days you worked
+- 💰 **Automatic calculation**: Instantly computes your total reimbursement
 - 📊 **Smart summaries**: Generates clear, exportable expense reports
 - 🔄 **Multi-invoice support**: Handles multiple TfL statements seamlessly
 
-![Summary Report](images/summary.png)
+![Expense Summary Report](images/expense-summary.png)
 
 ## 💡 Why This Project Matters
 
@@ -66,16 +54,14 @@ This project demonstrates advanced skills in **AI agent development** and **prod
 - **Multi-modal AI processing** (text, PDF, images via OCR)
 - **Context-aware data extraction** that understands TfL invoice formats
 - **Structured output validation** ensuring data integrity
+- **Performance-optimized processing**: PDF page-level chunking and parallel processing reduced latency by 78.5% (58.63s → 12.58s for large documents)
 
 ### Production Observability
 
-Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring:
+Built-in **full-stack tracing** with Langfuse for production-grade AI monitoring. Using observability-driven optimization, we identified and resolved performance bottlenecks:
 
-![Langfuse Tracing - Workflow](images/tracing-1.png)
-_End-to-end trace showing the complete expense calculation workflow_
-
-![Langfuse Tracing - AI Calls](images/tracing-2.png)
-_Detailed AI model observability with token usage, latency, and cost tracking_
+![Langfuse Document Chunking Optimization](images/langfuse-doc-chunking.png)
+_Langfuse trace revealing document processing bottlenecks, leading to 78.5% latency reduction through intelligent chunking and parallelization_
 
 ### Enterprise Security
 
@@ -85,26 +71,9 @@ _Detailed AI model observability with token usage, latency, and cost tracking_
 
 ## 🛠️ Tech Stack
 
-### Frontend
-
-- **React 19** - Latest React with modern features
-- **TypeScript** - Type-safe development
-- **Vite** - Lightning-fast build tool
-- **PDF.js** - Client-side PDF processing
-- **Tesseract.js** - OCR for image-based invoices
-
-### Backend
-
-- **Node.js + Express** - Secure API proxy server
-- **Google Gemini AI** - Advanced multimodal AI
-- **Langfuse** - Production AI observability
-- **OpenTelemetry** - Distributed tracing
-
-### DevOps & Tooling
-
-- **pnpm** - Fast, efficient package manager
-- **Doppler** - Secure secrets management
-- **Concurrently** - Multi-process orchestration
+**Frontend**: React 19, TypeScript, Vite, PDF.js, Tesseract.js  
+**Backend**: Node.js, Express, Google Gemini AI, Langfuse, OpenTelemetry  
+**DevOps**: pnpm, Doppler, Concurrently
 
 ## 🚀 Quick Start
 
@@ -218,120 +187,22 @@ This project showcases **production-grade AI monitoring** using Langfuse:
 3. Add them to your `.env` file
 4. View traces in real-time as you use the app
 
-The app works perfectly fine without Langfuse, but you'll miss out on the powerful observability features that make debugging AI systems a breeze.
+## 🔒 Security
 
-## 🔒 Security Architecture
-
-This project implements **enterprise-grade security** for API key protection:
-
-✅ **Backend Proxy Pattern**: All AI requests go through a secure server  
-✅ **Zero Client Exposure**: API keys never touch the browser  
-✅ **CORS Protection**: Only configured origins can access the API  
-✅ **Rate Limiting**: 30 requests/minute per IP to prevent abuse  
-✅ **Production Ready**: Designed for HTTPS deployment
-
-**Health Check**: Visit `http://localhost:3001/health` to verify the backend is running.
+- ✅ **Backend Proxy Pattern**: All AI requests go through a secure server
+- ✅ **Zero Client Exposure**: API keys never touch the browser
+- ✅ **CORS Protection**: Only configured origins can access the API
+- ✅ **Rate Limiting**: 30 requests/minute per IP
 
 ## 🐛 Troubleshooting
 
-**Issue**: "Failed to fetch" or "Cannot connect to backend"
+**"Failed to fetch" error**: Ensure backend is running (`pnpm run dev:server`) and check `http://localhost:3001/health` returns `{"status":"ok"}`
 
-**Solutions**:
-
-1. Ensure backend is running: `pnpm run dev:server`
-2. Check `http://localhost:3001/health` returns `{"status":"ok"}`
-3. Verify `GEMINI_API_KEY` is set in `.env`
-4. Confirm ports 3000 and 3001 are available
-
-**Issue**: "Invalid API key" error
-
-**Solutions**:
-
-1. Get a valid key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Ensure no extra spaces in your `.env` file
-3. Restart the backend server after updating the key
-
-### Deployment Platforms
-
-This app can be deployed to:
-
-- **Vercel** (frontend) + **Railway** (backend)
-- **Netlify** (frontend) + **Render** (backend)
-- **AWS** (S3 + Lambda/EC2)
-- **Docker** (containerized deployment)
-
-**Security Checklist for Production:**
-
-- ✅ Use HTTPS for all connections
-- ✅ Set `FRONTEND_ORIGIN` to your actual domain
-- ✅ Rotate API keys regularly
-- ✅ Enable Langfuse for monitoring
-- ✅ Set up alerts for API usage spikes
-
-## 🎓 Skills Demonstrated
-
-This project showcases expertise in:
-
-### AI/ML Engineering
-
-- Prompt engineering for structured data extraction
-- Multi-modal AI (text, PDF, images)
-- AI agent workflow design
-- Production AI monitoring and observability
-
-### Full-Stack Development
-
-- Modern React with TypeScript
-- RESTful API design
-- Security-first architecture
-- Client-server communication
-
-### DevOps & Best Practices
-
-- Environment management (Doppler)
-- Distributed tracing (OpenTelemetry)
-- Error handling and validation
-- Production-ready code structure
-
-### Problem Solving
-
-- Real-world automation of manual processes
-- User-centric design
-- Performance optimization
-- Scalable architecture
+**"Invalid API key" error**: Get a valid key from [Google AI Studio](https://aistudio.google.com/app/apikey) and restart the backend server
 
 ## 🤝 Contributing
 
-Found a bug or have a feature idea? Contributions are welcome!
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
-5. Open a Pull Request
-
-## 👨‍💻 About
-
-Built by **Femi** as a portfolio piece to showcase real-world AI engineering capabilities.
-
-### What This Project Represents
-
-This project demonstrates my ability to:
-
-- **Identify real problems** and build practical AI solutions
-- **Engineer production-grade systems** with proper monitoring and security
-- **Integrate cutting-edge AI** (Google Gemini) into full-stack applications
-- **Write clean, maintainable code** following industry best practices
-- **Think about the entire stack** from UX to deployment
-
-### Tech Stack Expertise
-
-**Languages**: TypeScript, JavaScript, Python  
-**Frontend**: React, Next.js, Vue  
-**Backend**: Node.js, Express, FastAPI  
-**AI/ML**: LangChain, OpenAI, Google Gemini, Prompt Engineering  
-**DevOps**: Docker, AWS, Vercel, Railway  
-**Tools**: Git, Langfuse, OpenTelemetry, Doppler
+Contributions are welcome! Fork the repository, create a feature branch, and open a Pull Request.
 
 ---
 

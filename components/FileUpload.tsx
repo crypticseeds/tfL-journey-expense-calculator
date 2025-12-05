@@ -6,7 +6,8 @@ interface FileUploadProps {
   disabled: boolean;
 }
 
-const MAX_FILES = 3;
+const MAX_CSV_FILES = 6;
+const MAX_PDF_FILES = 3;
 
 const FileUpload: React.FC<FileUploadProps> = ({
   onFilesSelected,
@@ -19,18 +20,34 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
-      const totalFiles = selectedFiles.length + newFiles.length;
+      const allFiles = [...selectedFiles, ...newFiles];
 
-      if (totalFiles > MAX_FILES) {
+      // Count files by type
+      const csvFiles = allFiles.filter(
+        (file) => file.type === "text/csv" || /\.csv$/i.test(file.name)
+      );
+      const pdfFiles = allFiles.filter(
+        (file) => file.type === "application/pdf"
+      );
+
+      // Validate limits
+      if (csvFiles.length > MAX_CSV_FILES) {
         setFileLimitError(
-          `Maximum ${MAX_FILES} files allowed. Please remove some files first.`
+          `Maximum ${MAX_CSV_FILES} CSV files allowed. Please remove some CSV files first.`
+        );
+        event.target.value = ""; // Reset input
+        return;
+      }
+
+      if (pdfFiles.length > MAX_PDF_FILES) {
+        setFileLimitError(
+          `Maximum ${MAX_PDF_FILES} PDF files allowed. Please remove some PDF files first.`
         );
         event.target.value = ""; // Reset input
         return;
       }
 
       setFileLimitError(null);
-      const allFiles = [...selectedFiles, ...newFiles];
       setSelectedFiles(allFiles);
       onFilesSelected(allFiles);
     }
@@ -43,18 +60,34 @@ const FileUpload: React.FC<FileUploadProps> = ({
       setIsDragging(false);
       if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
         const newFiles = Array.from(event.dataTransfer.files);
-        const totalFiles = selectedFiles.length + newFiles.length;
+        const allFiles = [...selectedFiles, ...newFiles];
 
-        if (totalFiles > MAX_FILES) {
+        // Count files by type
+        const csvFiles = allFiles.filter(
+          (file) => file.type === "text/csv" || /\.csv$/i.test(file.name)
+        );
+        const pdfFiles = allFiles.filter(
+          (file) => file.type === "application/pdf"
+        );
+
+        // Validate limits
+        if (csvFiles.length > MAX_CSV_FILES) {
           setFileLimitError(
-            `Maximum ${MAX_FILES} files allowed. Please remove some files first.`
+            `Maximum ${MAX_CSV_FILES} CSV files allowed. Please remove some CSV files first.`
+          );
+          event.dataTransfer.clearData();
+          return;
+        }
+
+        if (pdfFiles.length > MAX_PDF_FILES) {
+          setFileLimitError(
+            `Maximum ${MAX_PDF_FILES} PDF files allowed. Please remove some PDF files first.`
           );
           event.dataTransfer.clearData();
           return;
         }
 
         setFileLimitError(null);
-        const allFiles = [...selectedFiles, ...newFiles];
         setSelectedFiles(allFiles);
         onFilesSelected(allFiles);
         event.dataTransfer.clearData();
@@ -119,7 +152,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
             or drag and drop
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Supports CSV, PDF, PNG, and JPG (Maximum {MAX_FILES} files)
+            Supports CSV (max {MAX_CSV_FILES}), PDF (max {MAX_PDF_FILES}), PNG,
+            and JPG
           </p>
         </div>
         <input
