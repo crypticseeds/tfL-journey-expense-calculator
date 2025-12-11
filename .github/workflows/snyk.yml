@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Snyk Security Scan
-        uses: snyk/actions/node@v4
+        uses: snyk/actions/node@master
         with:
           command: test
         env:
