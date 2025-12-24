@@ -21,8 +21,8 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
       '@langfuse/tracing':
-        specifier: ^4.4.2
-        version: 4.4.2(@opentelemetry/api@1.9.0)
+        specifier: ^4.5.1
+        version: 4.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -458,6 +458,11 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
 
+  '@langfuse/core@4.5.1':
+    resolution: {integrity: sha512-caJ2YWcaEU+kbzxFiyzRYaCmKxGzL9DSxbrCer8HbayYo2TaFaAu67Zeili8u8qG4q7TXga4aL2+rpU5ebWdRA==}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+
   '@langfuse/otel@4.4.2':
     resolution: {integrity: sha512-iEhjyXFFX2JsST8ZjKmRMT4SehM3xjqWKEgTXd/llE4rsPQmSJSwX4tfank2TawdO8lbP5kRtQ889/nsjYIIoA==}
     engines: {node: '>=20'}
@@ -467,8 +472,8 @@ packages:
       '@opentelemetry/exporter-trace-otlp-http': '>=0.202.0 <1.0.0'
       '@opentelemetry/sdk-trace-base': ^2.0.1
 
-  '@langfuse/tracing@4.4.2':
-    resolution: {integrity: sha512-+99jL4BLus0yKk8UvPyJbTfVs9A6edDeSe/WMyjk5jwl2qrrSCWDorKn+90XUvJVLdlbgdFKq4CqQ6YPLIcwYQ==}
+  '@langfuse/tracing@4.5.1':
+    resolution: {integrity: sha512-PvN8fJzEDG2IQMD7/iGhoeEzMM0fJ/ktZdy5gfMfj3/UUccigqV0flxpzvgRoAUss+0ZmqkIlJoaerHKOCMD+A==}
     engines: {node: '>=20'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -2756,11 +2761,15 @@ snapshots:
   '@langfuse/client@4.4.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@langfuse/core': 4.4.2(@opentelemetry/api@1.9.0)
-      '@langfuse/tracing': 4.4.2(@opentelemetry/api@1.9.0)
+      '@langfuse/tracing': 4.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api': 1.9.0
       mustache: 4.2.0
 
   '@langfuse/core@4.4.2(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+
+  '@langfuse/core@4.5.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
 
@@ -2772,9 +2781,9 @@ snapshots:
       '@opentelemetry/exporter-trace-otlp-http': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.2.0(@opentelemetry/api@1.9.0)
 
-  '@langfuse/tracing@4.4.2(@opentelemetry/api@1.9.0)':
+  '@langfuse/tracing@4.5.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@langfuse/core': 4.4.2(@opentelemetry/api@1.9.0)
+      '@langfuse/core': 4.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/api': 1.9.0
 
   '@napi-rs/canvas-android-arm64@0.1.82':
