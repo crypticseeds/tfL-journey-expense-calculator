@@ -12,13 +12,13 @@ importers:
   .:
     dependencies:
       '@google/genai':
-        specifier: ^1.29.0
-        version: 1.30.0
+        specifier: ^1.38.0
+        version: 1.38.0
       '@langfuse/client':
         specifier: ^4.4.2
         version: 4.4.2(@opentelemetry/api@1.9.0)
       '@langfuse/otel':
-        specifier: ^4.5.1
+        specifier: ^4.4.9
         version: 4.5.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/exporter-trace-otlp-http@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
       '@langfuse/tracing':
         specifier: ^4.4.2
@@ -54,7 +54,7 @@ importers:
         specifier: ^4.4.168
         version: 4.10.38
       react:
-        specifier: ^19.2.3
+        specifier: ^19.2.1
         version: 19.2.3
       react-dom:
         specifier: ^19.2.0
@@ -403,11 +403,11 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@google/genai@1.30.0':
-    resolution: {integrity: sha512-3MRcgczBFbUat1wIlZoLJ0vCCfXgm7Qxjh59cZi2X08RgWLtm9hKOspzp7TOg1TV2e26/MLxR2GR5yD5GmBV2w==}
+  '@google/genai@1.38.0':
+    resolution: {integrity: sha512-V/4CQVQGovvGHuS73lwJwHKR9x33kCij3zz/ReEQ4A7RJaV0U7m4k1mvYhFk55cGZdF5JLKu2S9BTaFuEs5xTA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@modelcontextprotocol/sdk': ^1.20.1
+      '@modelcontextprotocol/sdk': ^1.25.2
     peerDependenciesMeta:
       '@modelcontextprotocol/sdk':
         optional: true
@@ -2714,9 +2714,10 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@google/genai@1.30.0':
+  '@google/genai@1.38.0':
     dependencies:
       google-auth-library: 10.5.0
+      protobufjs: 7.5.4
       ws: 8.18.3
     transitivePeerDependencies:
       - bufferutil
