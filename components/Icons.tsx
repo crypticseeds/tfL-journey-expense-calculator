@@ -1,6 +1,10 @@
 import React from "react";
 
-export const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
+interface IconProps {
+  className?: string;
+}
+
+export const UploadIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -17,7 +21,7 @@ export const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const FileIcon: React.FC<{ className?: string }> = ({ className }) => (
+export const FileIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -34,9 +38,7 @@ export const FileIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const ChevronLeftIcon: React.FC<{ className?: string }> = ({
-  className,
-}) => (
+export const ChevronLeftIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -49,9 +51,7 @@ export const ChevronLeftIcon: React.FC<{ className?: string }> = ({
   </svg>
 );
 
-export const ChevronRightIcon: React.FC<{ className?: string }> = ({
-  className,
-}) => (
+export const ChevronRightIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -64,7 +64,7 @@ export const ChevronRightIcon: React.FC<{ className?: string }> = ({
   </svg>
 );
 
-export const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
+export const SunIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -81,7 +81,7 @@ export const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const MoonIcon: React.FC<{ className?: string }> = ({ className }) => (
+export const MoonIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -98,7 +98,7 @@ export const MoonIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
+export const TrashIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -115,9 +115,7 @@ export const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const StartOverIcon: React.FC<{ className?: string }> = ({
-  className,
-}) => (
+export const StartOverIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}

@@ -117,8 +117,8 @@ const Calendar: React.FC<CalendarProps> = ({
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
-        {daysOfWeek.map((day) => (
-          <div key={day}>{day}</div>
+        {daysOfWeek.map((day, index) => (
+          <div key={`${day}-${index}`}>{day}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-y-1">{calendarDays}</div>

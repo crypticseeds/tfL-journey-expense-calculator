@@ -6,7 +6,7 @@ interface FileUploadProps {
   disabled: boolean;
 }
 
-const MAX_CSV_FILES = 6;
+const MAX_CSV_FILES = 7;
 const MAX_PDF_FILES = 3;
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -17,12 +17,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileLimitError, setFileLimitError] = useState<string | null>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newFiles = Array.from(event.target.files);
+  const addFiles = useCallback(
+    (newFiles: File[]) => {
       const allFiles = [...selectedFiles, ...newFiles];
-
-      // Count files by type
       const csvFiles = allFiles.filter(
         (file) => file.type === "text/csv" || /\.csv$/i.test(file.name)
       );
@@ -30,12 +27,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         (file) => file.type === "application/pdf"
       );
 
-      // Validate limits
       if (csvFiles.length > MAX_CSV_FILES) {
         setFileLimitError(
           `Maximum ${MAX_CSV_FILES} CSV files allowed. Please remove some CSV files first.`
         );
-        event.target.value = ""; // Reset input
         return;
       }
 
@@ -43,13 +38,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
         setFileLimitError(
           `Maximum ${MAX_PDF_FILES} PDF files allowed. Please remove some PDF files first.`
         );
-        event.target.value = ""; // Reset input
         return;
       }
 
       setFileLimitError(null);
       setSelectedFiles(allFiles);
       onFilesSelected(allFiles);
+    },
+    [onFilesSelected, selectedFiles]
+  );
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      addFiles(Array.from(event.target.files));
+      event.target.value = "";
     }
   };
 
@@ -58,42 +60,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
       event.preventDefault();
       event.stopPropagation();
       setIsDragging(false);
-      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-        const newFiles = Array.from(event.dataTransfer.files);
-        const allFiles = [...selectedFiles, ...newFiles];
-
-        // Count files by type
-        const csvFiles = allFiles.filter(
-          (file) => file.type === "text/csv" || /\.csv$/i.test(file.name)
-        );
-        const pdfFiles = allFiles.filter(
-          (file) => file.type === "application/pdf"
-        );
-
-        // Validate limits
-        if (csvFiles.length > MAX_CSV_FILES) {
-          setFileLimitError(
-            `Maximum ${MAX_CSV_FILES} CSV files allowed. Please remove some CSV files first.`
-          );
-          event.dataTransfer.clearData();
-          return;
-        }
-
-        if (pdfFiles.length > MAX_PDF_FILES) {
-          setFileLimitError(
-            `Maximum ${MAX_PDF_FILES} PDF files allowed. Please remove some PDF files first.`
-          );
-          event.dataTransfer.clearData();
-          return;
-        }
-
-        setFileLimitError(null);
-        setSelectedFiles(allFiles);
-        onFilesSelected(allFiles);
+      if (event.dataTransfer.files.length > 0) {
+        addFiles(Array.from(event.dataTransfer.files));
         event.dataTransfer.clearData();
       }
     },
-    [onFilesSelected, selectedFiles]
+    [addFiles]
   );
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -114,8 +86,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const removeFile = (index: number) => {
-    const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
+    const newFiles = selectedFiles.filter(
+      (_, fileIndex) => fileIndex !== index
+    );
     setSelectedFiles(newFiles);
     onFilesSelected(newFiles);
   };
@@ -183,8 +156,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
             </h3>
             {selectedFiles.length > 1 && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   if (!disabled) clearAllFiles();
                 }}
                 className="flex items-center text-sm font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 disabled:opacity-50 transition-colors"
@@ -199,7 +172,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <div className="flex flex-wrap gap-3">
             {selectedFiles.map((file, index) => (
               <div
-                key={index}
+                key={`${file.name}-${file.lastModified}-${index}`}
                 className="flex items-center justify-between py-1.5 pl-3 pr-2 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 max-w-xs"
               >
                 <div className="flex items-center min-w-0">
@@ -209,8 +182,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   </span>
                 </div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(event) => {
+                    event.stopPropagation();
                     if (!disabled) removeFile(index);
                   }}
                   className="ml-2 p-0.5 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-600 dark:hover:text-slate-200 disabled:opacity-50 transition-colors"

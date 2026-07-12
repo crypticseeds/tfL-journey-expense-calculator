@@ -8,6 +8,9 @@ import prettierConfig from "eslint-config-prettier";
 import globals from "globals";
 
 export default [
+  {
+    ignores: ["dist/**"],
+  },
   js.configs.recommended,
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
