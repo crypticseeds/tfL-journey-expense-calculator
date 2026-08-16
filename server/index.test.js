@@ -95,3 +95,75 @@ describe("Gemini endpoint", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("TfL line status endpoint", () => {
+  const tflResponse = (lines) =>
+    new Response(JSON.stringify(lines), { status: 200 });
+
+  it("returns disruptions worst first and drops good service", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      tflResponse([
+        {
+          id: "victoria",
+          name: "Victoria",
+          lineStatuses: [
+            { statusSeverity: 10, statusSeverityDescription: "Good Service" },
+          ],
+        },
+        {
+          id: "central",
+          name: "Central",
+          lineStatuses: [
+            { statusSeverity: 6, statusSeverityDescription: "Severe Delays" },
+          ],
+        },
+      ])
+    );
+    const baseUrl = await startApp({ geminiApiKey: "test", fetchImpl });
+
+    const response = await fetch(`${baseUrl}/api/tfl/line-status`);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      lines: [
+        {
+          id: "victoria",
+          name: "Victoria",
+          status: "Good Service",
+          severity: 10,
+        },
+        {
+          id: "central",
+          name: "Central",
+          status: "Severe Delays",
+          severity: 6,
+        },
+      ],
+    });
+  });
+
+  it("caches the upstream response", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(tflResponse([]));
+    const baseUrl = await startApp({ geminiApiKey: "test", fetchImpl });
+
+    await fetch(`${baseUrl}/api/tfl/line-status`);
+    await fetch(`${baseUrl}/api/tfl/line-status`);
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns 502 when TfL fails", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(new Response("nope", { status: 503 }));
+    const baseUrl = await startApp({
+      geminiApiKey: "test",
+      fetchImpl,
+      retryOptions: { backoffMs: 0 },
+    });
+
+    const response = await fetch(`${baseUrl}/api/tfl/line-status`);
+
+    expect(response.status).toBe(502);
+  });
+});

@@ -765,3 +765,89 @@ input:focus-visible {
   font-size: var(--font-size-caption);
   color: var(--colour-ink-secondary);
 }
+
+/* Masthead disruption pill with a dropdown panel. */
+.app-disruption-pill {
+  position: relative;
+}
+
+.app-disruption-pill__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: 16px;
+  background-color: #ffb800;
+  color: #0b0c0c;
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+
+.app-disruption-pill__summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-disruption-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #0b0c0c;
+}
+
+.app-disruption-pill__panel {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  min-width: 15rem;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1) var(--space-2);
+  list-style: none;
+  background-color: var(--colour-white);
+  color: var(--colour-ink);
+  border: var(--border-width) solid var(--colour-border-strong);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  font-size: var(--font-size-caption);
+}
+
+.app-disruption-pill__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width) solid var(--colour-border);
+}
+
+.app-disruption-pill__row:last-child {
+  border-bottom: none;
+}
+
+.app-disruption-pill__chip {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.app-disruption-pill__name {
+  font-weight: 700;
+}
+
+.app-disruption-pill__status {
+  color: var(--colour-ink-secondary);
+  margin-left: auto;
+}
+
+/* On narrow screens the pill sits near the left edge, so anchor the panel to
+   the left and let it use the width available. */
+@media (max-width: 40em) {
+  .app-disruption-pill__panel {
+    right: auto;
+    left: 0;
+    min-width: 0;
+    width: calc(100vw - var(--space-4));
+  }
+}

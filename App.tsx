@@ -15,6 +15,7 @@ import {
   XIcon,
 } from "./components/Icons";
 import { runWithConcurrency } from "./services/concurrency";
+import DisruptionPill from "./components/DisruptionPill";
 
 interface LoadingState {
   active: boolean;
@@ -227,6 +228,7 @@ const App: React.FC = () => {
           <JourneyMarker className="w-8 h-8 shrink-0" />
           <span className="app-masthead__title">Journey expenses</span>
           <span className="app-masthead__spacer" />
+          <DisruptionPill />
           <button
             type="button"
             className="app-theme-toggle"
