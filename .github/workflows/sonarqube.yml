@@ -22,7 +22,7 @@ jobs:
           java-version: "21"
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
+        uses: SonarSource/sonarqube-scan-action@v5
         with:
           projectBaseDir: .
         env:
