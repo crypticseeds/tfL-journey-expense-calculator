@@ -6,10 +6,11 @@ export default defineConfig(() => {
   return {
     server: {
       port: 3000,
+      strictPort: true,
       host: "0.0.0.0",
       proxy: {
         "/api": {
-          target: process.env.VITE_API_BASE_URL,
+          target: process.env.VITE_API_BASE_URL || "http://localhost:3001",
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path, // Don't rewrite, forward as-is

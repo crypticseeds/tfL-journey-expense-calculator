@@ -2,6 +2,7 @@
   "name": "tfl-journey-expense-calculator",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@11.22.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -30,11 +31,10 @@
     "@opentelemetry/sdk-trace-web": "^2.2.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "express": "^4.22.1",
     "pdfjs-dist": "^4.4.168",
     "react": "^19.2.1",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.3",
     "tesseract.js": "^5.0.4"
   },
   "devDependencies": {
