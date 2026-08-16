@@ -281,6 +281,10 @@ export function mergeEntriesByMaxCount(
   return result;
 }
 
+export function mergeDisjointChunks(chunks: TravelEntry[][]): TravelEntry[] {
+  return chunks.flat();
+}
+
 // CSV parser for daily totals: expects lines with date and total; accepts multiple date formats and £
 export function parseCsvToTravelEntries(text: string): TravelEntry[] {
   const lines = text
@@ -659,15 +663,7 @@ export const extractTravelDataFromFile = async (
           );
 
           // Merge all chunk results
-          let mergedEntries: TravelEntry[] = [];
-          for (const chunkEntries of chunkResults) {
-            if (chunkEntries.length > 0) {
-              mergedEntries = mergeEntriesByMaxCount(
-                mergedEntries,
-                chunkEntries
-              );
-            }
-          }
+          let mergedEntries = mergeDisjointChunks(chunkResults);
 
           // Apply heuristic fallback and return
           if (rawTextForFallback) {

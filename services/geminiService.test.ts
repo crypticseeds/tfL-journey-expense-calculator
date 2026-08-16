@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   addPreviousPageContext,
+  mergeDisjointChunks,
   mergeEntriesByMaxCount,
   parseCsvToTravelEntries,
   parseJourneysHeuristically,
@@ -40,6 +41,26 @@ describe("travel entry parsing", () => {
       entry,
       entry,
     ]);
+  });
+
+  it("keeps identical journeys from disjoint PDF chunks", () => {
+    const chunk3 = [
+      { date: "2025-10-07", amount: 1.75 },
+      { date: "2025-10-07", amount: 0 },
+    ];
+    const chunk4 = [
+      { date: "2025-10-07", amount: 1.75 },
+      { date: "2025-10-07", amount: 0 },
+      { date: "2025-10-07", amount: 3.6 },
+      { date: "2025-10-07", amount: 5.2 },
+    ];
+
+    const total = mergeDisjointChunks([chunk3, chunk4]).reduce(
+      (sum, entry) => sum + entry.amount,
+      0
+    );
+
+    expect(total).toBeCloseTo(12.3);
   });
 
   it("rebuilds PDF text in visual reading order", () => {
