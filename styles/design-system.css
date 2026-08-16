@@ -1,0 +1,563 @@
+/*
+ * Design tokens for the "journey ledger" interface.
+ *
+ * Defined as plain custom properties so they work today under the Tailwind CDN
+ * and unchanged after build-time Tailwind lands; the Tailwind theme should map
+ * onto these variables rather than redefining the values.
+ */
+
+:root {
+  /* Palette */
+  --colour-blue: #0019a8;
+  --colour-blue-dark: #000f73;
+  --colour-canvas: #f3f2f1;
+  --colour-white: #ffffff;
+  --colour-ink: #0b0c0c;
+  --colour-ink-secondary: #505a5f;
+  --colour-border: #b1b4b6;
+  --colour-border-strong: #6f777b;
+  --colour-link: #1d70b8;
+  --colour-error: #d4351c;
+  --colour-focus: #ffdd00;
+
+  /* Typography */
+  --font-sans: "Hanken Grotesk", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-size-caption: 0.875rem; /* 14px */
+  --font-size-body: 1rem; /* 16px */
+  --font-size-lead: 1.1875rem; /* 19px */
+  --font-size-heading-s: 1.5rem; /* 24px */
+  --font-size-heading-m: 2rem; /* 32px */
+  --font-size-heading-l: 2.25rem; /* 36px */
+  --font-size-total: 3rem; /* 48px */
+
+  /* 8px spacing grid */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* Structure */
+  --content-width: 1080px;
+  --radius: 0;
+  --target-min: 44px;
+  --border-width: 1px;
+  --border-width-thick: 4px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--colour-canvas);
+}
+
+body {
+  margin: 0;
+  background-color: var(--colour-canvas);
+  color: var(--colour-ink);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Money and other figures line up column-wise. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Type scale. Headings carry their size here rather than at the call site. */
+.app-heading-l {
+  font-size: var(--font-size-heading-l);
+  padding-top: var(--space-5);
+  max-width: 30ch;
+}
+
+.app-heading-m {
+  font-size: var(--font-size-heading-m);
+}
+
+.app-heading-s {
+  font-size: var(--font-size-heading-s);
+}
+
+/* A subheading that opens a new block of content. */
+.app-subheading {
+  font-size: var(--font-size-heading-s);
+  margin-top: var(--space-5);
+}
+
+.app-lead {
+  max-width: 60ch;
+  font-size: var(--font-size-lead);
+  color: var(--colour-ink-secondary);
+}
+
+/* Supporting copy: secondary ink, body size. */
+.app-hint {
+  color: var(--colour-ink-secondary);
+}
+
+.app-flush {
+  margin-bottom: 0;
+}
+
+/* A single focus treatment for every interactive element, GOV.UK style:
+   yellow block with a solid ink underline, never a soft glow. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible {
+  outline: 3px solid transparent;
+  background-color: var(--colour-focus);
+  box-shadow:
+    0 -2px var(--colour-focus),
+    0 var(--border-width-thick) var(--colour-ink);
+  color: var(--colour-ink);
+  text-decoration: none;
+}
+
+.app-link {
+  color: var(--colour-link);
+  text-underline-offset: 2px;
+}
+
+.app-link:hover {
+  color: var(--colour-blue-dark);
+}
+
+/* A button that has to read as a link, e.g. "Remove" inside a table row. */
+.app-link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--colour-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.app-link-button:hover:not(:disabled) {
+  color: var(--colour-blue-dark);
+}
+
+/* Buttons */
+.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  background-color: var(--colour-blue);
+  color: var(--colour-white);
+  font-family: inherit;
+  font-size: var(--font-size-lead);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.app-button:hover:not(:disabled) {
+  background-color: var(--colour-blue-dark);
+}
+
+.app-button:disabled {
+  background-color: var(--colour-border);
+  color: var(--colour-white);
+  cursor: not-allowed;
+}
+
+.app-button--secondary {
+  background-color: transparent;
+  border-color: var(--colour-border-strong);
+  color: var(--colour-blue);
+  padding: 0 var(--space-2);
+}
+
+.app-button--secondary:hover:not(:disabled) {
+  background-color: var(--colour-white);
+  color: var(--colour-blue-dark);
+}
+
+/* Page chrome */
+.app-masthead {
+  background-color: var(--colour-blue);
+  color: var(--colour-white);
+  border-bottom: 10px solid var(--colour-ink);
+}
+
+.app-masthead__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-2);
+}
+
+.app-masthead__title {
+  font-size: var(--font-size-heading-s);
+  letter-spacing: -0.01em;
+}
+
+.app-container {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--space-2);
+}
+
+.app-main {
+  padding-bottom: var(--space-8);
+}
+
+/* Two panels side by side on wider screens, stacked below the tablet
+   breakpoint so the calendar never forces a horizontal scrollbar. */
+.app-split {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+  padding-top: var(--space-3);
+}
+
+@media (min-width: 40.0625em) {
+  .app-split {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  }
+}
+
+/* The panel beside the calendar starts flush with its top edge. */
+.app-split__panel > :first-child {
+  margin-top: 0;
+}
+
+.app-reset-row {
+  margin: var(--space-2) 0 0;
+}
+
+/* GOV.UK error summary: thick red rule, focus moved here on failure. */
+.app-error-summary {
+  border: var(--border-width-thick) solid var(--colour-error);
+  padding: var(--space-2);
+  margin-top: var(--space-3);
+  background-color: var(--colour-white);
+}
+
+.app-error-summary__title {
+  font-size: var(--font-size-heading-s);
+  color: var(--colour-error);
+}
+
+/* A single-field error shown next to the control that caused it. */
+.app-error-inline {
+  border-left: var(--border-width-thick) solid var(--colour-error);
+  padding-left: var(--space-2);
+  color: var(--colour-error);
+  font-weight: 700;
+}
+
+.app-service-strip {
+  background-color: var(--colour-white);
+  border-bottom: var(--border-width) solid var(--colour-border);
+}
+
+.app-service-strip__inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-2);
+  color: var(--colour-ink-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.app-footer {
+  margin-top: var(--space-8);
+  border-top: var(--border-width-thick) solid var(--colour-blue);
+  background-color: var(--colour-white);
+}
+
+.app-footer__inner {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2);
+  color: var(--colour-ink-secondary);
+  font-size: var(--font-size-caption);
+}
+
+/* Numbered stages */
+.app-stage {
+  padding-top: var(--space-5);
+}
+
+.app-stage__heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  font-size: var(--font-size-heading-s);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--border-width) solid var(--colour-border);
+}
+
+.app-stage__number {
+  color: var(--colour-ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Calendar */
+.app-calendar {
+  background-color: var(--colour-white);
+  border: var(--border-width) solid var(--colour-border);
+  padding: var(--space-2);
+}
+
+.app-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.app-calendar__month {
+  font-size: var(--font-size-lead);
+}
+
+.app-calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+  border: var(--border-width) solid var(--colour-border);
+  border-radius: var(--radius);
+  background-color: var(--colour-white);
+  color: var(--colour-blue);
+  cursor: pointer;
+}
+
+.app-calendar__nav:hover {
+  background-color: var(--colour-canvas);
+}
+
+.app-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.app-calendar__weekday {
+  padding-bottom: var(--space-1);
+  color: var(--colour-ink-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  text-align: center;
+}
+
+.app-calendar__day {
+  width: 100%;
+  min-height: var(--target-min);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  background-color: transparent;
+  color: var(--colour-ink);
+  font-family: inherit;
+  font-size: var(--font-size-body);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.app-calendar__day:hover {
+  background-color: var(--colour-canvas);
+  border-color: var(--colour-border);
+}
+
+.app-calendar__day--today {
+  border-color: var(--colour-border-strong);
+  font-weight: 700;
+}
+
+.app-calendar__day--selected,
+.app-calendar__day--selected:hover {
+  background-color: var(--colour-blue);
+  border-color: var(--colour-blue);
+  color: var(--colour-white);
+  font-weight: 700;
+}
+
+/* Visible to screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Upload */
+.app-upload {
+  border: 2px dashed var(--colour-border-strong);
+  background-color: var(--colour-white);
+  padding: var(--space-3);
+}
+
+.app-upload--dragging {
+  border-color: var(--colour-blue);
+  background-color: var(--colour-canvas);
+}
+
+.app-upload--disabled {
+  opacity: 0.6;
+}
+
+.app-upload__hint {
+  margin: 0 0 var(--space-2);
+  color: var(--colour-ink-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.app-upload__drag-hint {
+  margin-left: var(--space-2);
+  color: var(--colour-ink-secondary);
+}
+
+/* Data tables: rules, not rounded rows. Currency right-aligned. */
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-2);
+}
+
+.app-table caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: var(--space-1);
+}
+
+.app-table th,
+.app-table td {
+  padding: var(--space-1) var(--space-1) var(--space-1) 0;
+  border-bottom: var(--border-width) solid var(--colour-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.app-table th {
+  font-weight: 700;
+}
+
+/* Keeps the money column tight against the right-hand edge of the table. */
+.app-table__numeric {
+  width: 8rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Leading icon column: just wide enough for the glyph. */
+.app-table__icon {
+  width: 24px;
+}
+
+/* Trailing action column: shrink to the width of its content. */
+.app-table__actions {
+  width: 1%;
+}
+
+/* Total band */
+.app-total {
+  margin-top: var(--space-2);
+  background-color: var(--colour-blue);
+  color: var(--colour-white);
+  padding: var(--space-3);
+}
+
+.app-total__label {
+  font-size: var(--font-size-lead);
+}
+
+.app-total__amount {
+  display: block;
+  font-size: var(--font-size-total);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.app-total__meta {
+  margin: var(--space-1) 0 0;
+}
+
+/* Progress */
+.app-progress {
+  height: var(--space-1);
+  background-color: var(--colour-border);
+  border: var(--border-width) solid var(--colour-border-strong);
+}
+
+.app-progress__bar {
+  height: 100%;
+  background-color: var(--colour-blue);
+}
+
+.app-loader__message {
+  margin-top: 0;
+  font-weight: 700;
+}
+
+/* Single-series bar chart */
+.app-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-1);
+  height: 200px;
+  border-bottom: var(--border-width-thick) solid var(--colour-ink);
+  padding-top: var(--space-2);
+}
+
+.app-chart__column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+}
+
+.app-chart__bar {
+  width: 100%;
+  max-width: 56px;
+  background-color: var(--colour-blue);
+}
+
+/* Month labels sit under the columns and share their track widths. */
+.app-chart__labels {
+  display: flex;
+  gap: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+.app-chart__label {
+  flex: 1 1 0;
+  text-align: center;
+  font-size: var(--font-size-caption);
+  color: var(--colour-ink-secondary);
+}

@@ -1,3 +1,4 @@
+import "./styles/design-system.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 // Initialize Langfuse instrumentation early (non-blocking)
