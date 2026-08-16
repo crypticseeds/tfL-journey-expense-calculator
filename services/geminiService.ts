@@ -2,6 +2,7 @@ import { Type } from "@google/genai";
 import { TravelEntry } from "../types";
 import { traceGeminiCall, traceFileProcessing } from "./langfuseService";
 import { runWithConcurrency } from "./concurrency";
+import { createOcrSession } from "./ocr";
 
 // File reading utilities
 const readFileAsBase64 = (file: File): Promise<string> => {
@@ -548,51 +549,51 @@ export const extractTravelDataFromFile = async (
           const arrayBuffer = await readFileAsArrayBuffer(file);
           const pdf = await getDocument({ data: arrayBuffer }).promise;
 
-          // Read all pages first
-          const pageTexts: string[] = [];
-          for (let i = 1; i <= pdf.numPages; i++) {
-            onProgressUpdate(`Reading PDF page ${i} of ${pdf.numPages}...`);
-            const page = await pdf.getPage(i);
-
-            const textContent = await page.getTextContent();
-            let pageText = rebuildPageTextWithLineBreaks(
-              textContent as {
-                items?: Array<{
-                  str?: string;
-                  transform?: number[];
-                  matrix?: number[];
-                }>;
-              }
-            );
-
-            // If text is sparse, assume it's an image and use OCR
-            if (pageText.trim().length < 100) {
+          // Read and render pages in parallel. A single reused OCR worker queues
+          // sparse-page recognition while other pages continue preparing.
+          const ocr = createOcrSession();
+          const pageTasks = Array.from({ length: pdf.numPages }, (_, index) => {
+            const pageNumber = index + 1;
+            return async () => {
               onProgressUpdate(
-                `Page ${i} appears image-based. Starting OCR...`
+                `Reading PDF page ${pageNumber} of ${pdf.numPages}...`
               );
-              const viewport = page.getViewport({ scale: 2.0 });
-              const canvas = document.createElement("canvas");
-              const context = canvas.getContext("2d");
-              canvas.height = viewport.height;
-              canvas.width = viewport.width;
+              const page = await pdf.getPage(pageNumber);
 
-              await page.render({ canvasContext: context, viewport }).promise;
+              const textContent = await page.getTextContent();
+              let pageText = rebuildPageTextWithLineBreaks(
+                textContent as {
+                  items?: Array<{
+                    str?: string;
+                    transform?: number[];
+                    matrix?: number[];
+                  }>;
+                }
+              );
 
-              const { default: Tesseract } = await import("tesseract.js");
-              const {
-                data: { text },
-              } = await Tesseract.recognize(canvas, "eng", {
-                logger: (m: { status?: string; progress?: number }) => {
-                  if (m.status === "recognizing text") {
-                    onProgressUpdate(
-                      `OCR on page ${i}: ${Math.round((m.progress || 0) * 100)}% complete`
-                    );
-                  }
-                },
-              });
-              pageText = text;
-            }
-            pageTexts.push(pageText);
+              if (pageText.trim().length < 100) {
+                onProgressUpdate(
+                  `Page ${pageNumber} appears image-based. Starting OCR...`
+                );
+                const viewport = page.getViewport({ scale: 2.0 });
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport }).promise;
+                pageText = await ocr.recognizeText(canvas);
+                onProgressUpdate(`OCR on page ${pageNumber} complete.`);
+              }
+
+              return pageText;
+            };
+          });
+          let pageTexts: string[];
+          try {
+            pageTexts = await runWithConcurrency(pageTasks, 3);
+          } finally {
+            await ocr.release();
           }
 
           rawTextForFallback = pageTexts.join("\n\n");
