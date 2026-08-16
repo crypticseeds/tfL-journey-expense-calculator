@@ -22,7 +22,6 @@ jobs:
           java-version: "21"
 
       - name: SonarQube Scan
-        if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: .

@@ -4,10 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  jws: 4.0.1
-  protobufjs: 7.6.5
-
 importers:
 
   .:

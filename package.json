@@ -2,12 +2,6 @@
   "name": "tfl-journey-expense-calculator",
   "private": true,
   "version": "0.0.0",
-  "pnpm": {
-    "overrides": {
-      "jws": "4.0.1",
-      "protobufjs": "7.6.5"
-    }
-  },
   "type": "module",
   "scripts": {
     "dev": "vite",
