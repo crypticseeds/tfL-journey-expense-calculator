@@ -365,7 +365,7 @@ const App: React.FC = () => {
             TfL are trademarks of Transport for London.
           </p>
           <div className="app-footer__byline">
-            <p className="app-flush">Built by Femi Akinlotan, 2026.</p>
+            <p className="app-flush">Built by Femi Akinlotan 2026</p>
             <ul className="app-footer__social">
               <li>
                 <a

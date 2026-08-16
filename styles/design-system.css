@@ -370,7 +370,7 @@ input:focus-visible {
 .app-service-strip__inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-3);
   color: var(--colour-ink-secondary);
   font-size: var(--font-size-caption);
 }
@@ -409,13 +409,14 @@ input:focus-visible {
   padding: 0;
 }
 
-/* Byline and icons share one row so the footer stays short. */
+/* One row: byline against the left column edge, icons against the right. */
 .app-footer__byline {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: var(--space-1);
+  text-align: left;
 }
 
 .app-footer__social-link {
