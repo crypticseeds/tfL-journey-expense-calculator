@@ -12,12 +12,19 @@
   --colour-blue-dark: #000f73;
   --colour-canvas: #f3f2f1;
   --colour-white: #ffffff;
+  /* Text drawn on the blue accent. Stays white in both themes, unlike
+     --colour-white, which is a surface colour and darkens in dark mode. */
+  --colour-on-accent: #ffffff;
   --colour-ink: #0b0c0c;
   --colour-ink-secondary: #505a5f;
   --colour-border: #b1b4b6;
   --colour-border-strong: #6f777b;
   --colour-link: #1d70b8;
   --colour-error: #d4351c;
+  /* Destructive fill, kept separate from --colour-error: that one is text and
+     rules, and has to lighten in dark mode, which would break white-on-red. */
+  --colour-red: #d4351c;
+  --colour-red-dark: #aa2b16;
   --colour-focus: #ffdd00;
 
   /* Typography */
@@ -47,6 +54,25 @@
   --border-width-thick: 4px;
 }
 
+/* Dark theme. Only the palette changes: every rule below reads the same
+   tokens, so nothing else needs a dark variant. The class is set on <html>
+   before first paint by the inline script in index.html. */
+.dark {
+  --colour-blue: #3a6df0;
+  --colour-blue-dark: #5b8dff;
+  --colour-canvas: #0b0c0c;
+  --colour-white: #1c1f21;
+  --colour-ink: #f3f2f1;
+  --colour-ink-secondary: #b1b4b6;
+  --colour-border: #505a5f;
+  --colour-border-strong: #8a9296;
+  --colour-link: #8ab4f8;
+  --colour-error: #ff8a7a;
+  /* The fill itself stays dark enough for white text; only hover lightens,
+     mirroring --colour-blue-dark. */
+  --colour-red-dark: #e5543c;
+}
+
 *,
 *::before,
 *::after {
@@ -59,12 +85,23 @@ html {
 
 body {
   margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background-color: var(--colour-canvas);
   color: var(--colour-ink);
   font-family: var(--font-sans);
   font-size: var(--font-size-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* The React root carries the page chrome, so it - not <body> - is the
+   column that lets the footer sit at the bottom of short pages. */
+#root {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 h1,
@@ -167,7 +204,7 @@ input:focus-visible {
   border: var(--border-width) solid transparent;
   border-radius: var(--radius);
   background-color: var(--colour-blue);
-  color: var(--colour-white);
+  color: var(--colour-on-accent);
   font-family: inherit;
   font-size: var(--font-size-lead);
   font-weight: 700;
@@ -180,7 +217,7 @@ input:focus-visible {
 
 .app-button:disabled {
   background-color: var(--colour-border);
-  color: var(--colour-white);
+  color: var(--colour-on-accent);
   cursor: not-allowed;
 }
 
@@ -196,20 +233,32 @@ input:focus-visible {
   color: var(--colour-blue-dark);
 }
 
+/* Destructive weight: same solid fill as the primary button so the two read as
+   a matched pair, but in red so "Start again" is never mistaken for "Calculate". */
+.app-button--danger {
+  background-color: var(--colour-red);
+  color: var(--colour-on-accent);
+}
+
+.app-button--danger:hover:not(:disabled) {
+  background-color: var(--colour-red-dark);
+}
+
 /* Page chrome */
 .app-masthead {
   background-color: var(--colour-blue);
-  color: var(--colour-white);
+  color: var(--colour-on-accent);
   border-bottom: 10px solid var(--colour-ink);
 }
 
 .app-masthead__inner {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
 }
 
 .app-masthead__title {
@@ -217,10 +266,39 @@ input:focus-visible {
   letter-spacing: -0.01em;
 }
 
+/* Pushes the theme toggle to the end of the masthead row. */
+.app-masthead__spacer {
+  flex: 1 1 auto;
+}
+
+/* Icon only, no box or label: it sits in the masthead as a quiet control, so
+   it keeps the 44px touch target but shows nothing until hovered. */
+.app-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background-color: transparent;
+  color: var(--colour-on-accent);
+  cursor: pointer;
+}
+
+.app-theme-toggle:hover {
+  background-color: var(--colour-blue-dark);
+}
+
+/* width:100% matters: <main> is a flex item of #root, and a flex item with
+   auto side margins does not stretch, so without it the page collapsed to a
+   narrow fit-content column. */
 .app-container {
+  width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 var(--space-2);
+  padding: 0 var(--space-3);
 }
 
 .app-main {
@@ -247,8 +325,20 @@ input:focus-visible {
   margin-top: 0;
 }
 
-.app-reset-row {
-  margin: var(--space-2) 0 0;
+/* Calculate and Start again share a line, including on the narrowest phones:
+   the buttons shrink rather than wrap, so the pair stays a single unit. */
+.app-actions {
+  display: flex;
+  gap: var(--space-2);
+  /* Capped so the pair does not stretch across a wide desktop panel. */
+  max-width: 32rem;
+  margin-top: var(--space-2);
+}
+
+.app-actions .app-button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: var(--space-2);
 }
 
 /* GOV.UK error summary: thick red rule, focus moved here on failure. */
@@ -280,13 +370,16 @@ input:focus-visible {
 .app-service-strip__inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-2);
+  padding: var(--space-1) var(--space-3);
   color: var(--colour-ink-secondary);
   font-size: var(--font-size-caption);
 }
 
+/* margin-top:auto, not a fixed gap: the body/#root flex column above makes
+   this park the footer at the bottom of the viewport on short pages, while
+   long pages simply push it below the content. */
 .app-footer {
-  margin-top: var(--space-8);
+  margin-top: auto;
   border-top: var(--border-width-thick) solid var(--colour-blue);
   background-color: var(--colour-white);
 }
@@ -294,9 +387,49 @@ input:focus-visible {
 .app-footer__inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-1) var(--space-3);
   color: var(--colour-ink-secondary);
   font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.app-footer__inner p {
+  margin: 0;
+}
+
+.app-footer__inner p + p {
+  margin-top: var(--space-1);
+}
+
+.app-footer__social {
+  display: flex;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* One row: byline against the left column edge, icons against the right. */
+.app-footer__byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  text-align: left;
+}
+
+.app-footer__social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--colour-ink-secondary);
+}
+
+.app-footer__social-link:hover {
+  color: var(--colour-link);
 }
 
 /* Numbered stages */
@@ -395,7 +528,7 @@ input:focus-visible {
 .app-calendar__day--selected:hover {
   background-color: var(--colour-blue);
   border-color: var(--colour-blue);
-  color: var(--colour-white);
+  color: var(--colour-on-accent);
   font-weight: 700;
 }
 
@@ -413,10 +546,20 @@ input:focus-visible {
 }
 
 /* Upload */
+/* Upload: the button sits centred inside the dropzone with the drag hint
+   beneath it. Only the contents of the box are centred - the section around
+   it stays left-aligned with the rest of the page. */
 .app-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 132px;
   border: 2px dashed var(--colour-border-strong);
   background-color: var(--colour-white);
   padding: var(--space-3);
+  text-align: center;
 }
 
 .app-upload--dragging {
@@ -435,8 +578,69 @@ input:focus-visible {
 }
 
 .app-upload__drag-hint {
-  margin-left: var(--space-2);
   color: var(--colour-ink-secondary);
+}
+
+/* Disclosure sections. Native details/summary: keyboard and screen reader
+   behaviour comes for free, and closed is the default with no state to hold. */
+.app-disclosure {
+  margin-top: var(--space-5);
+  border-top: var(--border-width) solid var(--colour-border);
+}
+
+.app-disclosure__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-heading-s);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* A flex summary drops the native triangle, so draw our own chevron. */
+.app-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-disclosure__summary::marker {
+  content: "";
+}
+
+.app-disclosure__title::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: var(--space-1);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15em) rotate(-45deg);
+}
+
+[open] > .app-disclosure__summary .app-disclosure__title::before {
+  transform: translateY(-0.15em) rotate(45deg);
+}
+
+.app-disclosure__title {
+  flex: 1 1 auto;
+}
+
+.app-disclosure__total {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Month groups sit inside the day-by-day section: indented, lighter, and a
+   size down from the section that contains them. */
+.app-disclosure--month {
+  margin-top: 0;
+  margin-left: var(--space-2);
+}
+
+.app-disclosure--month > .app-disclosure__summary {
+  font-size: var(--font-size-body);
 }
 
 /* Data tables: rules, not rounded rows. Currency right-aligned. */
@@ -486,7 +690,7 @@ input:focus-visible {
 .app-total {
   margin-top: var(--space-2);
   background-color: var(--colour-blue);
-  color: var(--colour-white);
+  color: var(--colour-on-accent);
   padding: var(--space-3);
 }
 

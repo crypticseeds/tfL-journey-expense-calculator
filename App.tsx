@@ -6,7 +6,14 @@ import FileUpload from "./components/FileUpload";
 import Calendar from "./components/Calendar";
 import SummaryReport from "./components/SummaryReport";
 import Loader from "./components/Loader";
-import { JourneyMarker, StartOverIcon } from "./components/Icons";
+import {
+  JourneyMarker,
+  StartOverIcon,
+  SunIcon,
+  MoonIcon,
+  GitHubIcon,
+  XIcon,
+} from "./components/Icons";
 import { runWithConcurrency } from "./services/concurrency";
 
 interface LoadingState {
@@ -14,6 +21,12 @@ interface LoadingState {
   message: string;
   progress: number;
 }
+
+// The inline script in index.html has already applied the theme before first
+// paint; this only reads back what it decided so the toggle starts in sync.
+const initialIsDark = () =>
+  typeof document !== "undefined" &&
+  document.documentElement.classList.contains("dark");
 
 const App: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -26,7 +39,17 @@ const App: React.FC = () => {
     progress: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(initialIsDark);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    try {
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    } catch {
+      // Storage unavailable (private mode): the choice just will not persist.
+    }
+  }, [isDark]);
 
   // GOV.UK error summary pattern: when a problem appears, move focus to it so
   // screen reader and keyboard users are told what went wrong.
@@ -203,6 +226,21 @@ const App: React.FC = () => {
         <div className="app-masthead__inner">
           <JourneyMarker className="w-8 h-8 shrink-0" />
           <span className="app-masthead__title">Journey expenses</span>
+          <span className="app-masthead__spacer" />
+          <button
+            type="button"
+            className="app-theme-toggle"
+            onClick={() => setIsDark((wasDark) => !wasDark)}
+            aria-pressed={isDark}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? (
+              <SunIcon className="w-6 h-6" />
+            ) : (
+              <MoonIcon className="w-6 h-6" />
+            )}
+          </button>
         </div>
       </header>
       <div className="app-service-strip">
@@ -267,30 +305,30 @@ const App: React.FC = () => {
                         selectedDates.length === 1 ? "day" : "days"
                       } selected.`}
                 </p>
-                <button
-                  type="button"
-                  className="app-button"
-                  onClick={processExpenses}
-                  disabled={
-                    loadingState.active ||
-                    files.length === 0 ||
-                    selectedDates.length === 0
-                  }
-                >
-                  {loadingState.active ? "Calculating" : "Calculate expenses"}
-                </button>
-                {canReset && !loadingState.active && (
-                  <p className="app-reset-row">
+                <div className="app-actions">
+                  <button
+                    type="button"
+                    className="app-button"
+                    onClick={processExpenses}
+                    disabled={
+                      loadingState.active ||
+                      files.length === 0 ||
+                      selectedDates.length === 0
+                    }
+                  >
+                    {loadingState.active ? "Calculating" : "Calculate expenses"}
+                  </button>
+                  {canReset && !loadingState.active && (
                     <button
                       type="button"
                       onClick={handleResetAll}
-                      className="app-button app-button--secondary"
+                      className="app-button app-button--danger"
                     >
                       <StartOverIcon className="w-4 h-4 mr-2" />
                       Start again
                     </button>
-                  </p>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -326,7 +364,35 @@ const App: React.FC = () => {
             with, endorsed by, or connected to Transport for London. Oyster and
             TfL are trademarks of Transport for London.
           </p>
-          <p className="app-flush">Built by Femi Akinlotan.</p>
+          <div className="app-footer__byline">
+            <p className="app-flush">Built by Femi Akinlotan 2026</p>
+            <ul className="app-footer__social">
+              <li>
+                <a
+                  className="app-footer__social-link"
+                  href="https://github.com/crypticseeds"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  title="GitHub"
+                >
+                  <GitHubIcon className="w-5 h-5" />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="app-footer__social-link"
+                  href="https://x.com/crypticseeds"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (formerly Twitter)"
+                  title="X"
+                >
+                  <XIcon className="w-5 h-5" />
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </footer>
     </>
