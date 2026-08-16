@@ -33,4 +33,24 @@ describe("runWithConcurrency", () => {
     expect(results).toEqual([0, 1, 2, 3]);
     expect(progress).toEqual([1, 2, 3, 4]);
   });
+
+  it("waits for active tasks before propagating a failure", async () => {
+    let finishActiveTask = () => {};
+    const activeTask = new Promise<void>((resolve) => {
+      finishActiveTask = resolve;
+    });
+    let rejected = false;
+    const run = runWithConcurrency(
+      [() => Promise.reject(new Error("failed")), () => activeTask],
+      2
+    ).catch((error) => {
+      rejected = true;
+      throw error;
+    });
+
+    await Promise.resolve();
+    expect(rejected).toBe(false);
+    finishActiveTask();
+    await expect(run).rejects.toThrow("failed");
+  });
 });
