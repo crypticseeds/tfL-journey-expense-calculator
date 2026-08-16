@@ -7,6 +7,10 @@
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-AI-4285F4?style=flat&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Langfuse](https://img.shields.io/badge/Langfuse-Observability-000000?style=flat)](https://langfuse.com/)
 
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=devopsfoundry_tfl-journey-expense-calculator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=devopsfoundry_tfl-journey-expense-calculator)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=devopsfoundry_tfl-journey-expense-calculator&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=devopsfoundry_tfl-journey-expense-calculator)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=devopsfoundry_tfl-journey-expense-calculator&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=devopsfoundry_tfl-journey-expense-calculator)
+
 ![TfL Journey Expense Calculator](images/tfl-home-page.png)
 
 ## 🎯 The Problem
