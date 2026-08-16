@@ -37,9 +37,17 @@ const DisruptionPill: React.FC = () => {
 
   return (
     <details className="app-disruption-pill">
-      <summary className="app-disruption-pill__summary">
+      <summary
+        className="app-disruption-pill__summary"
+        aria-label={`${lines.length} ${lines.length === 1 ? "line" : "lines"} disrupted`}
+      >
         <span className="app-disruption-pill__dot" aria-hidden="true" />
-        {lines.length} {lines.length === 1 ? "line" : "lines"} disrupted
+        {lines.length}
+        {/* Hidden on narrow screens so the masthead stays a single row; the
+            aria-label above keeps the full wording for screen readers. */}
+        <span className="app-disruption-pill__label">
+          {lines.length === 1 ? "line" : "lines"} disrupted
+        </span>
       </summary>
       <ul className="app-disruption-pill__panel">
         {lines.map((line) => (
