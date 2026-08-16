@@ -20,14 +20,20 @@ export const createApp = ({
   const langfuseBaseUrl =
     process.env.LANGFUSE_BASE_URL || "https://cloud.langfuse.com";
   const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
-  const trustProxy = process.env.TRUST_PROXY;
+  const trustProxyHops = Number.parseInt(
+    process.env.TRUST_PROXY_HOPS || "0",
+    10
+  );
+  if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0) {
+    throw new Error("TRUST_PROXY_HOPS must be a non-negative integer");
+  }
   const rateLimit = createRateLimiter({
     windowMs: RATE_LIMIT_WINDOW,
     maxRequests: RATE_LIMIT_MAX,
   });
 
   // Middleware
-  if (trustProxy) app.set("trust proxy", trustProxy);
+  if (trustProxyHops > 0) app.set("trust proxy", trustProxyHops);
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     res.set({
