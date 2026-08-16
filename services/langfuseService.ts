@@ -29,24 +29,18 @@ const initializeLangfuse = async (): Promise<void> => {
   }
 
   initializationPromise = (async () => {
-    const publicKey = (process.env.LANGFUSE_PUBLIC_KEY as string)?.trim();
-    const secretKey = (process.env.LANGFUSE_SECRET_KEY as string)?.trim();
-    const baseUrl = (process.env.LANGFUSE_BASE_URL as string)?.trim();
-
-    if (!publicKey || !secretKey || publicKey === "" || secretKey === "") {
-      console.warn("[Langfuse] Credentials not found. Tracing disabled.");
-      return;
-    }
-
     try {
-      const authString = btoa(`${publicKey}:${secretKey}`);
-      const otlpEndpoint = `${baseUrl.replace(/\/$/, "")}/api/public/otel/v1/traces`;
+      const apiBaseUrl = (
+        import.meta.env.PROD
+          ? import.meta.env.VITE_API_BASE_URL || "http://localhost:3001"
+          : ""
+      ).replace(/\/$/, "");
+      const otlpEndpoint = import.meta.env.PROD
+        ? `${apiBaseUrl}/api/langfuse/traces`
+        : "/api/langfuse/traces";
 
       const exporter = new OTLPTraceExporter({
         url: otlpEndpoint,
-        headers: {
-          Authorization: `Basic ${authString}`,
-        },
       });
 
       const resource = defaultResource().merge(

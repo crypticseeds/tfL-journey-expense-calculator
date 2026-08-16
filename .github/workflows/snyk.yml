@@ -18,12 +18,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11.22.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.12.0"
+          node-version: "22.13.0"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -33,5 +33,6 @@ jobs:
         uses: snyk/actions/node@master
         with:
           command: test
+          args: --all-projects --severity-threshold=critical
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
