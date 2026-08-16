@@ -70,23 +70,22 @@ interface GenerateContentResponse {
   response: unknown;
 }
 
-// Use relative URL when in dev mode (Vite will proxy to backend)
-// In production, use the full URL from environment variable
-const API_BASE_URL = import.meta.env.PROD
-  ? import.meta.env.VITE_API_BASE_URL || "http://localhost:3001"
-  : "/api"; // Vite proxy will handle this in development
+// The configured base is the API root. A relative value uses the same origin.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? "http://localhost:3001/api" : "/api");
+
+export const buildGenerateContentUrl = (
+  apiBaseUrl = "http://localhost:3001/api"
+): string => `${apiBaseUrl.replace(/\/$/, "")}/gemini/generateContent`;
 
 /**
  * Generate content using Gemini API via secure backend proxy
  */
-const generateContent = async (
+export const generateContent = async (
   request: GenerateContentRequest
 ): Promise<GenerateContentResponse> => {
-  // In dev mode, API_BASE_URL is '/api', so the full path is '/api/gemini/generateContent'
-  // In prod mode, API_BASE_URL is the full backend URL, so we append '/api/gemini/generateContent'
-  const url = import.meta.env.PROD
-    ? `${API_BASE_URL}/api/gemini/generateContent`
-    : `${API_BASE_URL}/gemini/generateContent`;
+  const url = buildGenerateContentUrl(API_BASE_URL);
 
   try {
     const response = await fetch(url, {
@@ -102,9 +101,7 @@ const generateContent = async (
     });
 
     if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ error: "Unknown error" }));
+      const error = await response.json().catch(() => ({}));
       throw new Error(
         error.error ||
           error.message ||

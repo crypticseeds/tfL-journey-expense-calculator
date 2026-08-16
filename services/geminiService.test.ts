@@ -1,14 +1,43 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   addPreviousPageContext,
+  buildGenerateContentUrl,
+  generateContent,
   mergeDisjointChunks,
   mergeEntriesByMaxCount,
   parseCsvToTravelEntries,
   parseJourneysHeuristically,
   rebuildPageTextWithLineBreaks,
 } from "./geminiService";
+
+describe("Gemini proxy client", () => {
+  it.each([
+    [
+      "https://example.com/api",
+      "https://example.com/api/gemini/generateContent",
+    ],
+    ["/api", "/api/gemini/generateContent"],
+    [undefined, "http://localhost:3001/api/gemini/generateContent"],
+  ])("builds one API prefix from %s", (baseUrl, expected) => {
+    expect(buildGenerateContentUrl(baseUrl)).toBe(expected);
+  });
+
+  it("preserves the HTTP status when the error body is not JSON", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response("Not found", {
+        status: 404,
+        statusText: "Not Found",
+        headers: { "Content-Type": "text/html" },
+      })
+    );
+
+    await expect(
+      generateContent({ model: "test-model", contents: {} })
+    ).rejects.toThrow("HTTP 404: Not Found");
+  });
+});
 
 const fixture = (name: string) =>
   readFileSync(
