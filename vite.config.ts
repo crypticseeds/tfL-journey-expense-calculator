@@ -4,6 +4,12 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig(() => {
   return {
+    test: {
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "lcov"],
+      },
+    },
     server: {
       port: 3000,
       strictPort: true,
