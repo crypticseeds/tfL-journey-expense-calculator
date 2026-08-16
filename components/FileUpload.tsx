@@ -151,14 +151,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <UploadIcon className="w-5 h-5 mr-2" />
           Choose files
         </button>
-        <span
-          style={{
-            marginLeft: "var(--space-2)",
-            color: "var(--colour-ink-secondary)",
-          }}
-        >
-          or drag them here
-        </span>
+        <span className="app-upload__drag-hint">or drag them here</span>
         <input
           ref={fileInputRef}
           type="file"
@@ -172,15 +165,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       </div>
 
       {fileLimitError && (
-        <p
-          role="alert"
-          style={{
-            borderLeft: "var(--border-width-thick) solid var(--colour-error)",
-            paddingLeft: "var(--space-2)",
-            color: "var(--colour-error)",
-            fontWeight: 700,
-          }}
-        >
+        <p role="alert" className="app-error-inline">
           {fileLimitError}
         </p>
       )}
@@ -194,22 +179,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <tbody>
             {selectedFiles.map((file, index) => (
               <tr key={`${file.name}-${index}`}>
-                <td style={{ width: "24px" }}>
+                <td className="app-table__icon">
                   <FileIcon className="w-4 h-4" />
                 </td>
                 <td>{file.name}</td>
-                <td className="app-table__numeric" style={{ width: "1%" }}>
+                <td className="app-table__numeric app-table__actions">
                   <button
                     type="button"
-                    className="app-link"
-                    style={{
-                      background: "none",
-                      border: 0,
-                      padding: 0,
-                      font: "inherit",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                    }}
+                    className="app-link-button"
                     onClick={() => removeFile(index)}
                     disabled={disabled}
                   >

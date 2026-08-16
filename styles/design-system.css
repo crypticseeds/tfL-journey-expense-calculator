@@ -17,7 +17,6 @@
   --colour-border: #b1b4b6;
   --colour-border-strong: #6f777b;
   --colour-link: #1d70b8;
-  --colour-success: #00703c;
   --colour-error: #d4351c;
   --colour-focus: #ffdd00;
 
@@ -44,7 +43,6 @@
   /* Structure */
   --content-width: 1080px;
   --radius: 0;
-  --radius-small: 4px;
   --target-min: 44px;
   --border-width: 1px;
   --border-width-thick: 4px;
@@ -84,6 +82,42 @@ h3 {
   font-feature-settings: "tnum" 1;
 }
 
+/* Type scale. Headings carry their size here rather than at the call site. */
+.app-heading-l {
+  font-size: var(--font-size-heading-l);
+  padding-top: var(--space-5);
+  max-width: 30ch;
+}
+
+.app-heading-m {
+  font-size: var(--font-size-heading-m);
+}
+
+.app-heading-s {
+  font-size: var(--font-size-heading-s);
+}
+
+/* A subheading that opens a new block of content. */
+.app-subheading {
+  font-size: var(--font-size-heading-s);
+  margin-top: var(--space-5);
+}
+
+.app-lead {
+  max-width: 60ch;
+  font-size: var(--font-size-lead);
+  color: var(--colour-ink-secondary);
+}
+
+/* Supporting copy: secondary ink, body size. */
+.app-hint {
+  color: var(--colour-ink-secondary);
+}
+
+.app-flush {
+  margin-bottom: 0;
+}
+
 /* A single focus treatment for every interactive element, GOV.UK style:
    yellow block with a solid ink underline, never a soft glow. */
 a:focus-visible,
@@ -105,6 +139,22 @@ input:focus-visible {
 }
 
 .app-link:hover {
+  color: var(--colour-blue-dark);
+}
+
+/* A button that has to read as a link, e.g. "Remove" inside a table row. */
+.app-link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--colour-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.app-link-button:hover:not(:disabled) {
   color: var(--colour-blue-dark);
 }
 
@@ -172,6 +222,55 @@ input:focus-visible {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 0 var(--space-2);
+}
+
+.app-main {
+  padding-bottom: var(--space-8);
+}
+
+/* Two panels side by side on wider screens, stacked below the tablet
+   breakpoint so the calendar never forces a horizontal scrollbar. */
+.app-split {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+  padding-top: var(--space-3);
+}
+
+@media (min-width: 40.0625em) {
+  .app-split {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  }
+}
+
+/* The panel beside the calendar starts flush with its top edge. */
+.app-split__panel > :first-child {
+  margin-top: 0;
+}
+
+.app-reset-row {
+  margin: var(--space-2) 0 0;
+}
+
+/* GOV.UK error summary: thick red rule, focus moved here on failure. */
+.app-error-summary {
+  border: var(--border-width-thick) solid var(--colour-error);
+  padding: var(--space-2);
+  margin-top: var(--space-3);
+  background-color: var(--colour-white);
+}
+
+.app-error-summary__title {
+  font-size: var(--font-size-heading-s);
+  color: var(--colour-error);
+}
+
+/* A single-field error shown next to the control that caused it. */
+.app-error-inline {
+  border-left: var(--border-width-thick) solid var(--colour-error);
+  padding-left: var(--space-2);
+  color: var(--colour-error);
+  font-weight: 700;
 }
 
 .app-service-strip {
@@ -336,6 +435,11 @@ input:focus-visible {
   font-size: var(--font-size-caption);
 }
 
+.app-upload__drag-hint {
+  margin-left: var(--space-2);
+  color: var(--colour-ink-secondary);
+}
+
 /* Data tables: rules, not rounded rows. Currency right-aligned. */
 .app-table {
   width: 100%;
@@ -369,11 +473,26 @@ input:focus-visible {
   white-space: nowrap;
 }
 
+/* Leading icon column: just wide enough for the glyph. */
+.app-table__icon {
+  width: 24px;
+}
+
+/* Trailing action column: shrink to the width of its content. */
+.app-table__actions {
+  width: 1%;
+}
+
 /* Total band */
 .app-total {
+  margin-top: var(--space-2);
   background-color: var(--colour-blue);
   color: var(--colour-white);
   padding: var(--space-3);
+}
+
+.app-total__label {
+  font-size: var(--font-size-lead);
 }
 
 .app-total__amount {
@@ -400,6 +519,11 @@ input:focus-visible {
   background-color: var(--colour-blue);
 }
 
+.app-loader__message {
+  margin-top: 0;
+  font-weight: 700;
+}
+
 /* Single-series bar chart */
 .app-chart {
   display: flex;
@@ -423,4 +547,18 @@ input:focus-visible {
   width: 100%;
   max-width: 56px;
   background-color: var(--colour-blue);
+}
+
+/* Month labels sit under the columns and share their track widths. */
+.app-chart__labels {
+  display: flex;
+  gap: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+.app-chart__label {
+  flex: 1 1 0;
+  text-align: center;
+  font-size: var(--font-size-caption);
+  color: var(--colour-ink-secondary);
 }

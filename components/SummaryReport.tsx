@@ -24,11 +24,20 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
     return date.toLocaleString("en-GB", { month: "short" });
   };
 
+  // "YYYY-MM-DD" through the Date string parser is treated as UTC midnight and
+  // then rendered in local time, which shifts the day for anyone west of UTC.
+  // Build the date from its parts instead, as formatMonth does.
+  const parseDate = (dateStr: string) => {
+    const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    if (!parts) return null;
+    return new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+  };
+
   // Dates arrive as strings from the parser; only reformat the ones we can
   // read, rather than risk showing "Invalid Date".
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    if (Number.isNaN(date.getTime())) return dateStr;
+    const date = parseDate(dateStr);
+    if (!date) return dateStr;
     return date.toLocaleDateString("en-GB", {
       weekday: "short",
       day: "numeric",
@@ -42,18 +51,17 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
     0
   );
 
-  const dailyTotals = [...data.dailyTotals].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  // ISO dates sort correctly as plain strings, with no timezone in play.
+  const dailyTotals = [...data.dailyTotals].sort((a, b) =>
+    a.date.localeCompare(b.date)
   );
 
   return (
     <div>
-      <h2 style={{ fontSize: "var(--font-size-heading-m)" }}>
-        Your expense report
-      </h2>
+      <h2 className="app-heading-m">Your expense report</h2>
 
-      <div className="app-total" style={{ marginTop: "var(--space-2)" }}>
-        <span style={{ fontSize: "var(--font-size-lead)" }}>Expense total</span>
+      <div className="app-total">
+        <span className="app-total__label">Expense total</span>
         <span className="app-total__amount">{formatCurrency(data.total)}</span>
         <p className="app-total__meta">
           {dailyTotals.length}{" "}
@@ -63,14 +71,7 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
         </p>
       </div>
 
-      <h3
-        style={{
-          fontSize: "var(--font-size-heading-s)",
-          marginTop: "var(--space-5)",
-        }}
-      >
-        Spend by month
-      </h3>
+      <h3 className="app-subheading">Spend by month</h3>
 
       {data.monthlySummaries.length > 0 && (
         <>
@@ -89,24 +90,9 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
               </div>
             ))}
           </div>
-          <div
-            aria-hidden="true"
-            style={{
-              display: "flex",
-              gap: "var(--space-1)",
-              paddingTop: "var(--space-1)",
-            }}
-          >
+          <div aria-hidden="true" className="app-chart__labels">
             {data.monthlySummaries.map((summary) => (
-              <div
-                key={summary.month}
-                style={{
-                  flex: "1 1 0",
-                  textAlign: "center",
-                  fontSize: "var(--font-size-caption)",
-                  color: "var(--colour-ink-secondary)",
-                }}
-              >
+              <div key={summary.month} className="app-chart__label">
                 {formatMonthShort(summary.month)}
               </div>
             ))}
@@ -138,14 +124,7 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
 
       {dailyTotals.length > 0 && (
         <>
-          <h3
-            style={{
-              fontSize: "var(--font-size-heading-s)",
-              marginTop: "var(--space-5)",
-            }}
-          >
-            Day by day
-          </h3>
+          <h3 className="app-subheading">Day by day</h3>
           <table className="app-table">
             <caption className="sr-only">Total spend for each workday</caption>
             <thead>

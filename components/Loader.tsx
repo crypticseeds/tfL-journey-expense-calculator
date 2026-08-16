@@ -7,8 +7,10 @@ interface LoaderProps {
 
 const Loader: React.FC<LoaderProps> = ({ message, progress }) => {
   return (
-    <div role="status" aria-live="polite">
-      <p style={{ fontWeight: 700, marginTop: 0 }}>{message}</p>
+    // The announcement is handled by the persistent live region in App, so
+    // this is presentation only and must not be a second live region.
+    <div>
+      <p className="app-loader__message">{message}</p>
       {progress !== undefined && (
         <>
           <div
@@ -23,12 +25,7 @@ const Loader: React.FC<LoaderProps> = ({ message, progress }) => {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p
-            className="tabular"
-            style={{ color: "var(--colour-ink-secondary)" }}
-          >
-            {Math.round(progress)}% complete
-          </p>
+          <p className="tabular app-hint">{Math.round(progress)}% complete</p>
         </>
       )}
     </div>

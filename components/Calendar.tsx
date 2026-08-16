@@ -151,12 +151,11 @@ const Calendar: React.FC<CalendarProps> = ({
         {calendarDays}
       </div>
       {selectedDates.length > 0 && (
-        <p style={{ marginBottom: 0 }}>
+        <p className="app-reset-row">
           <button
             type="button"
             onClick={() => onDateChange([])}
             className="app-button app-button--secondary"
-            style={{ marginTop: "var(--space-2)" }}
           >
             <TrashIcon className="w-4 h-4 mr-2" />
             Clear selected days

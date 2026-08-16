@@ -246,26 +246,9 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <main
-        className="app-container"
-        style={{ paddingBottom: "var(--space-8)" }}
-      >
-        <h1
-          style={{
-            fontSize: "var(--font-size-heading-l)",
-            paddingTop: "var(--space-5)",
-            maxWidth: "30ch",
-          }}
-        >
-          TfL journey expense calculator
-        </h1>
-        <p
-          style={{
-            maxWidth: "60ch",
-            fontSize: "var(--font-size-lead)",
-            color: "var(--colour-ink-secondary)",
-          }}
-        >
+      <main className="app-container app-main">
+        <h1 className="app-heading-l">TfL journey expense calculator</h1>
+        <p className="app-lead">
           Upload your contactless and Oyster statements, tell us which days you
           travelled for work, and get a dated breakdown you can put on an
           expense claim.
@@ -277,23 +260,12 @@ const App: React.FC = () => {
             tabIndex={-1}
             role="alert"
             aria-labelledby="error-summary-title"
-            style={{
-              border: "var(--border-width-thick) solid var(--colour-error)",
-              padding: "var(--space-2)",
-              marginTop: "var(--space-3)",
-              backgroundColor: "var(--colour-white)",
-            }}
+            className="app-error-summary"
           >
-            <h2
-              id="error-summary-title"
-              style={{
-                fontSize: "var(--font-size-heading-s)",
-                color: "var(--colour-error)",
-              }}
-            >
+            <h2 id="error-summary-title" className="app-error-summary__title">
               There is a problem
             </h2>
-            <p style={{ marginBottom: 0 }}>{error}</p>
+            <p className="app-flush">{error}</p>
           </div>
         )}
 
@@ -314,25 +286,15 @@ const App: React.FC = () => {
               <span className="app-stage__number">2</span>
               Select the days you travelled for work
             </h2>
-            <div
-              style={{
-                display: "grid",
-                gap: "var(--space-4)",
-                gridTemplateColumns: "minmax(280px, 360px) minmax(0, 1fr)",
-                alignItems: "start",
-                paddingTop: "var(--space-3)",
-              }}
-            >
+            <div className="app-split">
               <Calendar
                 selectedDates={selectedDates}
                 onDateChange={handleDateChange}
                 currentDate={currentCalendarDate}
                 setCurrentDate={setCurrentCalendarDate}
               />
-              <div>
-                <p
-                  style={{ marginTop: 0, color: "var(--colour-ink-secondary)" }}
-                >
+              <div className="app-split__panel">
+                <p className="app-hint">
                   {selectedDates.length === 0
                     ? "No days selected yet."
                     : `${selectedDates.length} ${
@@ -352,12 +314,11 @@ const App: React.FC = () => {
                   {loadingState.active ? "Calculating" : "Calculate expenses"}
                 </button>
                 {canReset && !loadingState.active && (
-                  <p style={{ marginBottom: 0 }}>
+                  <p className="app-reset-row">
                     <button
                       type="button"
                       onClick={handleResetAll}
                       className="app-button app-button--secondary"
-                      style={{ marginTop: "var(--space-2)" }}
                     >
                       <StartOverIcon className="w-4 h-4 mr-2" />
                       Start again
@@ -370,6 +331,12 @@ const App: React.FC = () => {
         )}
 
         <section id="step-3-summary" className="app-stage">
+          {/* Always mounted, so the first progress message is announced: a
+              live region that appears at the same time as its content is
+              often missed by screen readers. */}
+          <div role="status" aria-live="polite" className="sr-only">
+            {loadingState.message}
+          </div>
           {loadingState.active && (
             <Loader
               message={loadingState.message}
@@ -378,7 +345,7 @@ const App: React.FC = () => {
           )}
           {!loadingState.active && summary && <SummaryReport data={summary} />}
           {!loadingState.active && !summary && hasFiles && (
-            <p style={{ color: "var(--colour-ink-secondary)" }}>
+            <p className="app-hint">
               Your expense report will appear here once you have selected your
               workdays and calculated.
             </p>
@@ -393,7 +360,7 @@ const App: React.FC = () => {
             with, endorsed by, or connected to Transport for London. Oyster and
             TfL are trademarks of Transport for London.
           </p>
-          <p style={{ marginBottom: 0 }}>Built by Femi Akinlotan.</p>
+          <p className="app-flush">Built by Femi Akinlotan.</p>
         </div>
       </footer>
     </>
