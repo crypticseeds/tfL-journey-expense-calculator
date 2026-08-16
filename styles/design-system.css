@@ -581,6 +581,68 @@ input:focus-visible {
   color: var(--colour-ink-secondary);
 }
 
+/* Disclosure sections. Native details/summary: keyboard and screen reader
+   behaviour comes for free, and closed is the default with no state to hold. */
+.app-disclosure {
+  margin-top: var(--space-5);
+  border-top: var(--border-width) solid var(--colour-border);
+}
+
+.app-disclosure__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-heading-s);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* A flex summary drops the native triangle, so draw our own chevron. */
+.app-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-disclosure__summary::marker {
+  content: "";
+}
+
+.app-disclosure__title::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: var(--space-1);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15em) rotate(-45deg);
+}
+
+[open] > .app-disclosure__summary .app-disclosure__title::before {
+  transform: translateY(-0.15em) rotate(45deg);
+}
+
+.app-disclosure__title {
+  flex: 1 1 auto;
+}
+
+.app-disclosure__total {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Month groups sit inside the day-by-day section: indented, lighter, and a
+   size down from the section that contains them. */
+.app-disclosure--month {
+  margin-top: 0;
+  margin-left: var(--space-2);
+}
+
+.app-disclosure--month > .app-disclosure__summary {
+  font-size: var(--font-size-body);
+}
+
 /* Data tables: rules, not rounded rows. Currency right-aligned. */
 .app-table {
   width: 100%;

@@ -56,6 +56,22 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
     a.date.localeCompare(b.date)
   );
 
+  // Group the day rows by their own month rather than reusing
+  // monthlySummaries: the header total then always matches the rows beneath it.
+  const dailyGroups = dailyTotals.reduce<
+    { month: string; total: number; days: typeof dailyTotals }[]
+  >((groups, day) => {
+    const month = day.date.slice(0, 7);
+    const current = groups[groups.length - 1];
+    if (current && current.month === month) {
+      current.total += day.total;
+      current.days.push(day);
+      return groups;
+    }
+    groups.push({ month, total: day.total, days: [day] });
+    return groups;
+  }, []);
+
   return (
     <div>
       <h2 className="app-heading-m">Your expense report</h2>
@@ -123,30 +139,49 @@ const SummaryReport: React.FC<SummaryReportProps> = ({ data }) => {
       </table>
 
       {dailyTotals.length > 0 && (
-        <>
-          <h3 className="app-subheading">Day by day</h3>
-          <table className="app-table">
-            <caption className="sr-only">Total spend for each workday</caption>
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col" className="app-table__numeric">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyTotals.map((day) => (
-                <tr key={day.date}>
-                  <td>{formatDate(day.date)}</td>
-                  <td className="app-table__numeric">
-                    {formatCurrency(day.total)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+        <details className="app-disclosure">
+          <summary className="app-disclosure__summary">
+            <span className="app-disclosure__title">Day by day</span>
+          </summary>
+          {dailyGroups.map((group) => (
+            <details
+              key={group.month}
+              className="app-disclosure app-disclosure--month"
+            >
+              <summary className="app-disclosure__summary">
+                <span className="app-disclosure__title">
+                  {formatMonth(group.month)}
+                </span>
+                <span className="app-disclosure__total">
+                  {formatCurrency(group.total)}
+                </span>
+              </summary>
+              <table className="app-table">
+                <caption className="sr-only">
+                  Total spend for each workday in {formatMonth(group.month)}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col" className="app-table__numeric">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.days.map((day) => (
+                    <tr key={day.date}>
+                      <td>{formatDate(day.date)}</td>
+                      <td className="app-table__numeric">
+                        {formatCurrency(day.total)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          ))}
+        </details>
       )}
     </div>
   );
