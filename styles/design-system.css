@@ -21,8 +21,7 @@
   --colour-focus: #ffdd00;
 
   /* Typography */
-  --font-sans:
-    "Hanken Grotesk", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-sans: "Hanken Grotesk", Arial, "Helvetica Neue", Helvetica, sans-serif;
   --font-size-caption: 0.875rem; /* 14px */
   --font-size-body: 1rem; /* 16px */
   --font-size-lead: 1.1875rem; /* 19px */
