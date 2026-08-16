@@ -1,5 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
-import { createRateLimiter, fetchWithRetry } from "./utils";
+import { createLruCache, createRateLimiter, fetchWithRetry } from "./utils";
+
+describe("createLruCache", () => {
+  it("refreshes reads and evicts the least recently used entry", () => {
+    const cache = createLruCache(2);
+    cache.set("first", 1);
+    cache.set("second", 2);
+
+    expect(cache.get("first")).toBe(1);
+    cache.set("third", 3);
+
+    expect(cache.get("second")).toBeUndefined();
+    expect(cache.get("first")).toBe(1);
+    expect(cache.get("third")).toBe(3);
+  });
+});
 
 describe("server utilities", () => {
   it("retries retryable upstream responses", async () => {

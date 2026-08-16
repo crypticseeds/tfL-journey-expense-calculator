@@ -51,25 +51,15 @@ describe("Gemini endpoint", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it("normalizes each response without caching document data", async () => {
-    const fetchImpl = vi
-      .fn()
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            candidates: [{ content: { parts: [{ text: "one" }] } }],
-          }),
-          { status: 200 }
-        )
+  it("caches normalized responses for identical requests", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          candidates: [{ content: { parts: [{ text: "one" }] } }],
+        }),
+        { status: 200 }
       )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            candidates: [{ content: { parts: [{ text: "two" }] } }],
-          }),
-          { status: 200 }
-        )
-      );
+    );
     const baseUrl = await startApp({ geminiApiKey: "test", fetchImpl });
 
     const first = await request(baseUrl, validRequest);
@@ -80,10 +70,10 @@ describe("Gemini endpoint", () => {
       response: { candidates: [{ content: { parts: [{ text: "one" }] } }] },
     });
     expect(await second.json()).toEqual({
-      text: "two",
-      response: { candidates: [{ content: { parts: [{ text: "two" }] } }] },
+      text: "one",
+      response: { candidates: [{ content: { parts: [{ text: "one" }] } }] },
     });
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it("returns the final upstream response after exhausting retries", async () => {

@@ -33,6 +33,31 @@ export function createRateLimiter({
   };
 }
 
+export function createLruCache(maxEntries) {
+  if (!Number.isInteger(maxEntries) || maxEntries < 1) {
+    throw new RangeError("maxEntries must be a positive integer");
+  }
+
+  const entries = new Map();
+
+  return {
+    get(key) {
+      if (!entries.has(key)) return undefined;
+      const value = entries.get(key);
+      entries.delete(key);
+      entries.set(key, value);
+      return value;
+    },
+    set(key, value) {
+      entries.delete(key);
+      entries.set(key, value);
+      if (entries.size > maxEntries) {
+        entries.delete(entries.keys().next().value);
+      }
+    },
+  };
+}
+
 export async function fetchWithRetry(
   url,
   options,

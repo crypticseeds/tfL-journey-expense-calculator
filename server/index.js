@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pathToFileURL } from "node:url";
-import { createRateLimiter, fetchWithRetry } from "./utils.js";
+import { createLruCache, createRateLimiter, fetchWithRetry } from "./utils.js";
 
 // Load environment variables
 dotenv.config();
@@ -16,6 +16,7 @@ export const createApp = ({
   geminiApiKey = process.env.GEMINI_API_KEY,
   fetchImpl = fetch,
   retryOptions = {},
+  responseCache = createLruCache(50),
 } = {}) => {
   const app = express();
   const langfusePublicKey = process.env.LANGFUSE_PUBLIC_KEY;
@@ -135,6 +136,10 @@ export const createApp = ({
           contents: contents,
           ...(Object.keys(generationConfig).length > 0 && { generationConfig }),
         };
+        const requestBody = JSON.stringify(geminiRequestBody);
+        const cacheKey = `${model}:${requestBody}`;
+        const cachedResponse = responseCache.get(cacheKey);
+        if (cachedResponse) return res.json(cachedResponse);
 
         // Forward the request to Google's Gemini API
         const response = await fetchWithRetry(
@@ -144,7 +149,7 @@ export const createApp = ({
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(geminiRequestBody),
+            body: requestBody,
           },
           { ...retryOptions, fetchImpl }
         );
@@ -165,6 +170,7 @@ export const createApp = ({
           text: data.candidates?.[0]?.content?.parts?.[0]?.text || "",
           response: data,
         };
+        responseCache.set(cacheKey, normalizedResponse);
         res.json(normalizedResponse);
       } catch (error) {
         console.error("Proxy error:", error);
