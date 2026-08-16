@@ -7,6 +7,8 @@ const PORT = process.env.PORT || 3001;
 const ALLOWED_GEMINI_MODELS = new Set(["gemini-3.1-flash-lite"]);
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const RATE_LIMIT_MAX = 30; // 30 requests per minute per IP
+const TFL_MODES = "tube,dlr,elizabeth-line,overground,tram";
+const TFL_CACHE_TTL = 60000; // TfL data changes slowly; protect the rate limit
 
 export const createApp = ({
   geminiApiKey = process.env.GEMINI_API_KEY,
@@ -94,6 +96,55 @@ export const createApp = ({
   // Health check endpoint
   app.get("/health", (req, res) => {
     res.json({ status: "ok", service: "gemini-proxy" });
+  });
+
+  // Proxy for TfL line status. Routed through the server so an app key can be
+  // added server-side later without rebuilding the client bundle.
+  let tflCache = null;
+
+  app.get("/api/tfl/line-status", rateLimit, async (req, res) => {
+    const now = Date.now();
+    if (tflCache && now < tflCache.expires) {
+      return res.json(tflCache.body);
+    }
+
+    const tflAppKey = process.env.TFL_APP_KEY;
+    const url =
+      `https://api.tfl.gov.uk/Line/Mode/${TFL_MODES}/Status` +
+      (tflAppKey ? `?app_key=${encodeURIComponent(tflAppKey)}` : "");
+
+    try {
+      const response = await fetchWithRetry(
+        url,
+        {},
+        { ...retryOptions, fetchImpl }
+      );
+
+      if (!response.ok) {
+        console.error("TfL API error:", response.status);
+        return res
+          .status(502)
+          .json({ error: "TfL line status request failed" });
+      }
+
+      const data = await response.json();
+      const lines = (Array.isArray(data) ? data : []).map((line) => {
+        const status = line.lineStatuses?.[0] ?? {};
+        return {
+          id: line.id,
+          name: line.name,
+          status: status.statusSeverityDescription ?? "Unknown",
+          severity: status.statusSeverity ?? 10,
+        };
+      });
+
+      const body = { lines };
+      tflCache = { body, expires: now + TFL_CACHE_TTL };
+      res.json(body);
+    } catch (error) {
+      console.error("TfL proxy error:", error);
+      res.status(502).json({ error: "TfL line status request failed" });
+    }
   });
 
   // Secure proxy endpoint for Gemini API

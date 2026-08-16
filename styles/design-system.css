@@ -253,7 +253,7 @@ input:focus-visible {
 
 .app-masthead__inner {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--space-2);
   max-width: var(--content-width);
@@ -261,9 +261,16 @@ input:focus-visible {
   padding: var(--space-2) var(--space-3);
 }
 
+/* nowrap above keeps brand left, pill + toggle right on one row. The title is
+   the only part allowed to give up space, so as a last resort it truncates
+   rather than pushing the controls onto a second line. */
 .app-masthead__title {
   font-size: var(--font-size-heading-s);
   letter-spacing: -0.01em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Pushes the theme toggle to the end of the masthead row. */
@@ -272,11 +279,13 @@ input:focus-visible {
 }
 
 /* Icon only, no box or label: it sits in the masthead as a quiet control, so
-   it keeps the 44px touch target but shows nothing until hovered. */
+   it keeps the 44px touch target but never paints a background - a background
+   on hover stuck visibly after a tap on touch devices. */
 .app-theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: var(--target-min);
   height: var(--target-min);
   padding: 0;
@@ -285,10 +294,15 @@ input:focus-visible {
   background-color: transparent;
   color: var(--colour-on-accent);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.app-theme-toggle:hover {
-  background-color: var(--colour-blue-dark);
+/* Hover affordance without a background, and only where a real pointer
+   exists, so touch taps leave nothing behind. */
+@media (hover: hover) {
+  .app-theme-toggle:hover {
+    opacity: 0.75;
+  }
 }
 
 /* width:100% matters: <main> is a flex item of #root, and a flex item with
@@ -764,4 +778,102 @@ input:focus-visible {
   text-align: center;
   font-size: var(--font-size-caption);
   color: var(--colour-ink-secondary);
+}
+
+/* Masthead disruption pill with a dropdown panel. */
+.app-disruption-pill {
+  position: relative;
+  flex: none;
+}
+
+.app-disruption-pill__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: 16px;
+  background-color: #ffb800;
+  color: #0b0c0c;
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-disruption-pill__summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-disruption-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #0b0c0c;
+}
+
+.app-disruption-pill__panel {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  min-width: 15rem;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1) var(--space-2);
+  list-style: none;
+  background-color: var(--colour-white);
+  color: var(--colour-ink);
+  border: var(--border-width) solid var(--colour-border-strong);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  font-size: var(--font-size-caption);
+}
+
+.app-disruption-pill__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width) solid var(--colour-border);
+}
+
+.app-disruption-pill__row:last-child {
+  border-bottom: none;
+}
+
+.app-disruption-pill__chip {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.app-disruption-pill__name {
+  font-weight: 700;
+}
+
+.app-disruption-pill__status {
+  color: var(--colour-ink-secondary);
+  margin-left: auto;
+}
+
+/* On narrow screens the pill shrinks to dot + count so the masthead never
+   wraps. The panel stays anchored to the pill's right edge and is capped so it
+   cannot run off the left of the screen. */
+@media (max-width: 40em) {
+  /* Step the brand down so it fits whole beside the pill and toggle on one
+     row rather than truncating; measured at 390px, lead was 6px short. */
+  .app-masthead__title {
+    font-size: var(--font-size-body);
+  }
+
+  .app-disruption-pill__label {
+    display: none;
+  }
+
+  .app-disruption-pill__panel {
+    min-width: 0;
+    width: max-content;
+    max-width: calc(100vw - var(--space-4) - var(--target-min));
+  }
 }
