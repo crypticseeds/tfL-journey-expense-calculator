@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+  addPreviousPageContext,
   mergeEntriesByMaxCount,
   parseCsvToTravelEntries,
   parseJourneysHeuristically,
@@ -47,5 +48,13 @@ describe("travel entry parsing", () => {
         JSON.parse(fixture("pdf-text-content.json"))
       )
     ).toBe("Tue 14 Oct 2025\nOxford Circus to Victoria £2.80");
+  });
+
+  it("includes the previous page as date context for later chunks", () => {
+    expect(addPreviousPageContext(["p1", "p2", "p3", "p4", "p5"], 2)).toEqual([
+      { pages: ["p1", "p2"] },
+      { context: "p2", pages: ["p3", "p4"] },
+      { context: "p4", pages: ["p5"] },
+    ]);
   });
 });

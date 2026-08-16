@@ -409,7 +409,7 @@ This is a CHUNK of a larger document. Extract EVERY individual journey charge fr
 
 CRITICAL:
 - Dates are often printed once followed by multiple journey lines; subsequent journeys inherit the most recent date header until a new date appears.
-- If this chunk starts without a date header, journeys may inherit dates from the previous chunk (this is handled during merging).
+- If this chunk starts without a date header, use the preceding context supplied before the chunk to inherit its date.
 - Output date as YYYY-MM-DD. Output amount as a positive number (no currency symbols).
 - Strictly IGNORE non-journey lines: any line containing (case-insensitive): cap, capped, daily cap, weekly cap, total, payment, auto top up, auto topup, refund, credit, adjustment.
 - Do NOT output daily or weekly totals; only individual journeys.
@@ -418,9 +418,24 @@ Return ONLY JSON in this schema:
 { "expenses": [ { "date": "YYYY-MM-DD", "amount": 0.00 }, ... ] }
 `;
 
+export function addPreviousPageContext(
+  pageTexts: string[],
+  pagesPerChunk: number
+): Array<{ context?: string; pages: string[] }> {
+  const chunks: Array<{ context?: string; pages: string[] }> = [];
+  for (let start = 0; start < pageTexts.length; start += pagesPerChunk) {
+    chunks.push({
+      context: start === 0 ? undefined : pageTexts[start - 1],
+      pages: pageTexts.slice(start, start + pagesPerChunk),
+    });
+  }
+  return chunks;
+}
+
 // Process a single PDF chunk (2-4 pages) through Gemini
 async function processPdfChunk(
   pages: string[],
+  previousPageContext: string | undefined,
   chunkIndex: number,
   totalChunks: number,
   model: string,
@@ -433,6 +448,9 @@ async function processPdfChunk(
   }
 ): Promise<TravelEntry[]> {
   const chunkText = pages.join("\n\n");
+  const contextInstruction = previousPageContext
+    ? `\n\nPRECEDING PAGE FOR DATE CONTEXT ONLY. Do not extract or output journeys from this section:\n${previousPageContext}\n\nCURRENT CHUNK TO EXTRACT:\n`
+    : "\n\nCURRENT CHUNK TO EXTRACT:\n";
   const chunkPrompt =
     totalChunks > 1
       ? `${CHUNK_PROMPT}\n\nThis is chunk ${chunkIndex + 1} of ${totalChunks} from the document.`
@@ -448,7 +466,10 @@ async function processPdfChunk(
       return await generateContent({
         model: model,
         contents: {
-          parts: [{ text: chunkPrompt }, { text: chunkText }],
+          parts: [
+            { text: `${chunkPrompt}${contextInstruction}` },
+            { text: chunkText },
+          ],
         },
         config: {
           responseMimeType: "application/json",
@@ -515,7 +536,7 @@ export const extractTravelDataFromFile = async (
       ) => { update: (data: unknown) => void; end: () => void };
     }) => {
       try {
-        const model = "gemini-2.5-flash-lite";
+        const model = "gemini-3.1-flash-lite";
         let contents;
         let rawTextForFallback = "";
 
@@ -610,10 +631,7 @@ export const extractTravelDataFromFile = async (
             pagesPerChunk = 4; // 4 pages per chunk for large PDFs
           }
 
-          const chunks: string[][] = [];
-          for (let i = 0; i < pageTexts.length; i += pagesPerChunk) {
-            chunks.push(pageTexts.slice(i, i + pagesPerChunk));
-          }
+          const chunks = addPreviousPageContext(pageTexts, pagesPerChunk);
 
           // Process chunks in parallel (limit to 3 concurrent)
           onProgressUpdate(
@@ -621,9 +639,10 @@ export const extractTravelDataFromFile = async (
           );
 
           const chunkTasks = chunks.map(
-            (chunkPages, chunkIndex) => () =>
+            (chunk, chunkIndex) => () =>
               processPdfChunk(
-                chunkPages,
+                chunk.pages,
+                chunk.context,
                 chunkIndex,
                 chunks.length,
                 model,

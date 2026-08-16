@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { createLruCache, createRateLimiter, fetchWithRetry } from "./utils.js";
 
 const PORT = process.env.PORT || 3001;
-const ALLOWED_GEMINI_MODELS = new Set(["gemini-2.5-flash-lite"]);
+const ALLOWED_GEMINI_MODELS = new Set(["gemini-3.1-flash-lite"]);
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const RATE_LIMIT_MAX = 30; // 30 requests per minute per IP
 
