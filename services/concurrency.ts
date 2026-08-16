@@ -10,13 +10,19 @@ export async function runWithConcurrency<T>(
   const results = new Array<T>(tasks.length);
   let nextIndex = 0;
   let completed = 0;
+  let failed = false;
 
   async function worker() {
-    while (nextIndex < tasks.length) {
+    while (!failed && nextIndex < tasks.length) {
       const index = nextIndex++;
-      results[index] = await tasks[index]();
-      completed++;
-      onComplete?.(completed, tasks.length);
+      try {
+        results[index] = await tasks[index]();
+        completed++;
+        onComplete?.(completed, tasks.length);
+      } catch (error) {
+        failed = true;
+        throw error;
+      }
     }
   }
 

@@ -84,7 +84,7 @@ export async function fetchWithRetry(
       if (attempt === attempts - 1) return response;
     } catch (error) {
       lastError = error;
-      if (error.name === "AbortError" || attempt === attempts - 1) throw error;
+      if (attempt === attempts - 1) throw error;
     } finally {
       clearTimeout(timeout);
     }

@@ -1,11 +1,7 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { pathToFileURL } from "node:url";
 import { createLruCache, createRateLimiter, fetchWithRetry } from "./utils.js";
-
-// Load environment variables
-dotenv.config();
 
 const PORT = process.env.PORT || 3001;
 const ALLOWED_GEMINI_MODELS = new Set(["gemini-2.5-flash-lite"]);
@@ -24,12 +20,23 @@ export const createApp = ({
   const langfuseBaseUrl =
     process.env.LANGFUSE_BASE_URL || "https://cloud.langfuse.com";
   const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
+  const trustProxy = process.env.TRUST_PROXY;
   const rateLimit = createRateLimiter({
     windowMs: RATE_LIMIT_WINDOW,
     maxRequests: RATE_LIMIT_MAX,
   });
 
   // Middleware
+  if (trustProxy) app.set("trust proxy", trustProxy);
+  app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    res.set({
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "Referrer-Policy": "no-referrer",
+    });
+    next();
+  });
   app.use(
     cors({
       origin: frontendOrigin,
@@ -50,7 +57,7 @@ export const createApp = ({
       }
 
       try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${langfuseBaseUrl.replace(/\/$/, "")}/api/public/otel/v1/traces`,
           {
             method: "POST",
@@ -60,7 +67,8 @@ export const createApp = ({
               Authorization: `Basic ${Buffer.from(`${langfusePublicKey}:${langfuseSecretKey}`).toString("base64")}`,
             },
             body: req.body,
-          }
+          },
+          { ...retryOptions, fetchImpl }
         );
         res
           .status(response.status)
@@ -102,8 +110,7 @@ export const createApp = ({
           return res.status(400).json({ error: "Unsupported model" });
         }
 
-        // Construct the Gemini API URL
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
         // Prepare the request body for Gemini API
         // Map config properties to Gemini API format
@@ -118,18 +125,6 @@ export const createApp = ({
           if (config.thinkingConfig) {
             generationConfig.thinkingConfig = config.thinkingConfig;
           }
-          // Copy any other config properties
-          Object.keys(config).forEach((key) => {
-            if (
-              ![
-                "responseMimeType",
-                "responseSchema",
-                "thinkingConfig",
-              ].includes(key)
-            ) {
-              generationConfig[key] = config[key];
-            }
-          });
         }
 
         const geminiRequestBody = {
@@ -148,6 +143,7 @@ export const createApp = ({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "x-goog-api-key": geminiApiKey,
             },
             body: requestBody,
           },
@@ -155,11 +151,9 @@ export const createApp = ({
         );
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Gemini API error:", response.status, errorText);
+          console.error("Gemini API error:", response.status);
           return res.status(response.status).json({
             error: "Gemini API request failed",
-            details: errorText,
           });
         }
 
@@ -170,7 +164,9 @@ export const createApp = ({
           text: data.candidates?.[0]?.content?.parts?.[0]?.text || "",
           response: data,
         };
-        responseCache.set(cacheKey, normalizedResponse);
+        if (normalizedResponse.text) {
+          responseCache.set(cacheKey, normalizedResponse);
+        }
         res.json(normalizedResponse);
       } catch (error) {
         console.error("Proxy error:", error);
@@ -179,7 +175,6 @@ export const createApp = ({
           error: timedOut
             ? "Gemini API request timed out"
             : "Gemini API unavailable",
-          message: error.message,
         });
       }
     }

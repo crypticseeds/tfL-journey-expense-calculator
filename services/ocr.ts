@@ -30,8 +30,11 @@ export const createOcrSession = () => {
   let released = false;
 
   return {
-    recognizeText: (image: HTMLCanvasElement): Promise<string> =>
-      enqueue(async () => {
+    recognizeText: (image: HTMLCanvasElement): Promise<string> => {
+      if (released) {
+        return Promise.reject(new Error("OCR session has been released."));
+      }
+      return enqueue(async () => {
         const currentWorkerPromise = getWorker();
         const worker = await currentWorkerPromise;
         try {
@@ -44,7 +47,8 @@ export const createOcrSession = () => {
           await worker.terminate();
           throw error;
         }
-      }),
+      });
+    },
     release: async (): Promise<void> => {
       if (released) return;
       released = true;

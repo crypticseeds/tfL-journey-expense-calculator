@@ -5,7 +5,11 @@ import { createApp } from "./index";
 const servers = [];
 
 afterEach(async () => {
-  await Promise.all(servers.splice(0).map((server) => server.close()));
+  await Promise.all(
+    servers
+      .splice(0)
+      .map((server) => new Promise((resolve) => server.close(resolve)))
+  );
 });
 
 const startApp = async (options) => {

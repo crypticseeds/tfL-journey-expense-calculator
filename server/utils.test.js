@@ -54,9 +54,9 @@ describe("server utilities", () => {
       name: "AbortError",
     });
 
-    await vi.advanceTimersByTimeAsync(10);
+    await vi.runAllTimersAsync();
     await rejection;
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
     vi.useRealTimers();
   });
 
