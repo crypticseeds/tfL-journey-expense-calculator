@@ -16,6 +16,22 @@
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Applies the saved (or system) theme before first paint, so the page
+         never flashes light before React mounts. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("theme");
+          var dark =
+            saved === "dark" ||
+            (saved === null &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          /* Storage unavailable (private mode): stay on the light default. */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
