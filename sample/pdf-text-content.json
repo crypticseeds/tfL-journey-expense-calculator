@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "str": "£2.80", "transform": [1, 0, 0, 1, 200, 700] },
+    { "str": "Tue 14 Oct 2025", "transform": [1, 0, 0, 1, 10, 720] },
+    { "str": "Oxford Circus to Victoria", "transform": [1, 0, 0, 1, 10, 700] }
+  ]
+}

@@ -7,6 +7,7 @@ import Calendar from "./components/Calendar";
 import SummaryReport from "./components/SummaryReport";
 import Loader from "./components/Loader";
 import { SunIcon, MoonIcon, StartOverIcon } from "./components/Icons";
+import { runWithConcurrency } from "./services/concurrency";
 
 interface LoadingState {
   active: boolean;
@@ -142,51 +143,16 @@ const App: React.FC = () => {
           }));
 
           // Process files with concurrency limit
-          const fileResults: TravelEntry[][] = [];
-          let hasError = false;
-          let errorMessage: string | null = null;
-
-          for (let i = 0; i < fileTasks.length; i += MAX_CONCURRENT_FILES) {
-            if (hasError) break; // Stop processing if error occurred
-
-            const batch = fileTasks.slice(i, i + MAX_CONCURRENT_FILES);
-            const batchPromises = batch.map(async (task) => {
-              try {
-                const entries = await task.task();
-                const completed = fileResults.length + batch.indexOf(task) + 1;
-                const progress = (completed / files.length) * 100;
-                setLoadingState((prevState) => ({
-                  ...prevState,
-                  progress: progress,
-                }));
-                return { success: true, entries };
-              } catch (error: unknown) {
-                const err = error as Error;
-                return {
-                  success: false,
-                  entries: [],
-                  error: err.message || `Failed to process ${task.file.name}`,
-                };
-              }
-            });
-
-            const batchResults = await Promise.all(batchPromises);
-
-            // Check for errors and stop on first error
-            for (const result of batchResults) {
-              if (!result.success) {
-                hasError = true;
-                errorMessage =
-                  result.error || "An error occurred while processing files.";
-                break;
-              }
-              fileResults.push(result.entries);
+          const fileResults = await runWithConcurrency<TravelEntry[]>(
+            fileTasks.map(({ task }) => task),
+            MAX_CONCURRENT_FILES,
+            (completed, total) => {
+              setLoadingState((prevState) => ({
+                ...prevState,
+                progress: (completed / total) * 100,
+              }));
             }
-          }
-
-          if (hasError && errorMessage) {
-            throw new Error(errorMessage);
-          }
+          );
 
           // Flatten all results
           for (const entries of fileResults) {

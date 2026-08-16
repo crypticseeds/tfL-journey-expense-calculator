@@ -1,10 +1,7 @@
 import { Type } from "@google/genai";
-import Tesseract from "tesseract.js";
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-// Vite worker import for pdf.js worker
-import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.mjs?worker&url";
 import { TravelEntry } from "../types";
 import { traceGeminiCall, traceFileProcessing } from "./langfuseService";
+import { runWithConcurrency } from "./concurrency";
 
 // File reading utilities
 const readFileAsBase64 = (file: File): Promise<string> => {
@@ -130,11 +127,8 @@ const generateContent = async (
   }
 };
 
-// Configure pdf.js worker to local bundled worker
-GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
-
 // Rebuild PDF page text with preserved line structure, grouping by Y position
-function rebuildPageTextWithLineBreaks(textContent: {
+export function rebuildPageTextWithLineBreaks(textContent: {
   items?: Array<{ str?: string; transform?: number[]; matrix?: number[] }>;
 }): string {
   const items = (textContent?.items ?? []) as Array<{
@@ -174,7 +168,7 @@ function rebuildPageTextWithLineBreaks(textContent: {
 }
 
 // Heuristic parser to recover journeys from raw text by inheriting date headers
-function parseJourneysHeuristically(text: string): TravelEntry[] {
+export function parseJourneysHeuristically(text: string): TravelEntry[] {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -253,7 +247,7 @@ function parseJourneysHeuristically(text: string): TravelEntry[] {
 }
 
 // Merge two entry sets keeping the maximum count per (date, amount) to avoid double counting or losing duplicates
-function mergeEntriesByMaxCount(
+export function mergeEntriesByMaxCount(
   a: TravelEntry[],
   b: TravelEntry[]
 ): TravelEntry[] {
@@ -287,7 +281,7 @@ function mergeEntriesByMaxCount(
 }
 
 // CSV parser for daily totals: expects lines with date and total; accepts multiple date formats and £
-function parseCsvToTravelEntries(text: string): TravelEntry[] {
+export function parseCsvToTravelEntries(text: string): TravelEntry[] {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -543,6 +537,14 @@ export const extractTravelDataFromFile = async (
 
         if (file.type === "application/pdf") {
           onProgressUpdate("Processing PDF...");
+          const [
+            { getDocument, GlobalWorkerOptions },
+            { default: pdfWorkerSrc },
+          ] = await Promise.all([
+            import("pdfjs-dist"),
+            import("pdfjs-dist/build/pdf.worker.mjs?worker&url"),
+          ]);
+          GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
           const arrayBuffer = await readFileAsArrayBuffer(file);
           const pdf = await getDocument({ data: arrayBuffer }).promise;
 
@@ -576,6 +578,7 @@ export const extractTravelDataFromFile = async (
 
               await page.render({ canvasContext: context, viewport }).promise;
 
+              const { default: Tesseract } = await import("tesseract.js");
               const {
                 data: { text },
               } = await Tesseract.recognize(canvas, "eng", {
@@ -616,29 +619,24 @@ export const extractTravelDataFromFile = async (
             `Processing ${chunks.length} chunk${chunks.length > 1 ? "s" : ""} in parallel...`
           );
 
-          const chunkPromises = chunks.map((chunkPages, chunkIndex) =>
-            processPdfChunk(
-              chunkPages,
-              chunkIndex,
-              chunks.length,
-              model,
-              onProgressUpdate,
-              fileSpan
-            )
+          const chunkTasks = chunks.map(
+            (chunkPages, chunkIndex) => () =>
+              processPdfChunk(
+                chunkPages,
+                chunkIndex,
+                chunks.length,
+                model,
+                onProgressUpdate,
+                fileSpan
+              )
           );
 
           // Process with concurrency limit of 3
           const MAX_CONCURRENT_CHUNKS = 3;
-          const chunkResults: TravelEntry[][] = [];
-          for (
-            let i = 0;
-            i < chunkPromises.length;
-            i += MAX_CONCURRENT_CHUNKS
-          ) {
-            const batch = chunkPromises.slice(i, i + MAX_CONCURRENT_CHUNKS);
-            const batchResults = await Promise.all(batch);
-            chunkResults.push(...batchResults);
-          }
+          const chunkResults = await runWithConcurrency(
+            chunkTasks,
+            MAX_CONCURRENT_CHUNKS
+          );
 
           // Merge all chunk results
           let mergedEntries: TravelEntry[] = [];

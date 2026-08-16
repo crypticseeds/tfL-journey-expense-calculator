@@ -7,32 +7,13 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const LANGFUSE_PUBLIC_KEY = process.env.LANGFUSE_PUBLIC_KEY;
+const LANGFUSE_SECRET_KEY = process.env.LANGFUSE_SECRET_KEY;
+const LANGFUSE_BASE_URL =
+  process.env.LANGFUSE_BASE_URL || "https://cloud.langfuse.com";
 
 // Security: Only allow requests from the frontend origin
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:3000";
-
-// Middleware
-app.use(
-  cors({
-    origin: FRONTEND_ORIGIN,
-    credentials: true,
-  })
-);
-app.use(express.json({ limit: "50mb" })); // Support large file uploads
-
-// Add request logging for debugging
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
-});
-
-// Get API key from environment (server-side only)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-if (!GEMINI_API_KEY) {
-  console.error("ERROR: GEMINI_API_KEY environment variable is not set");
-  process.exit(1);
-}
 
 // Security: Rate limiting middleware (basic implementation)
 const requestCounts = new Map();
@@ -70,6 +51,63 @@ const rateLimit = (req, res, next) => {
   record.count++;
   next();
 };
+
+// Middleware
+app.use(
+  cors({
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
+  })
+);
+
+app.post(
+  "/api/langfuse/traces",
+  rateLimit,
+  express.raw({
+    type: ["application/x-protobuf", "application/json"],
+    limit: "5mb",
+  }),
+  async (req, res) => {
+    if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
+      return res.status(204).end();
+    }
+
+    try {
+      const response = await fetch(
+        `${LANGFUSE_BASE_URL.replace(/\/$/, "")}/api/public/otel/v1/traces`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": req.get("Content-Type") || "application/x-protobuf",
+            Authorization: `Basic ${Buffer.from(`${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}`).toString("base64")}`,
+          },
+          body: req.body,
+        }
+      );
+      res
+        .status(response.status)
+        .send(Buffer.from(await response.arrayBuffer()));
+    } catch (error) {
+      console.error("Langfuse proxy error:", error);
+      res.status(502).json({ error: "Langfuse request failed" });
+    }
+  }
+);
+app.use(express.json({ limit: "50mb" })); // Support large file uploads
+
+// Add request logging for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
+
+// Get API key from environment (server-side only)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+if (!GEMINI_API_KEY) {
+  console.error("ERROR: GEMINI_API_KEY environment variable is not set");
+  process.exit(1);
+}
 
 // Health check endpoint
 app.get("/health", (req, res) => {
