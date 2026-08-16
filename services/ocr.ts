@@ -32,13 +32,16 @@ export const createOcrSession = () => {
   return {
     recognizeText: (image: HTMLCanvasElement): Promise<string> =>
       enqueue(async () => {
-        const worker = await getWorker();
+        const currentWorkerPromise = getWorker();
+        const worker = await currentWorkerPromise;
         try {
           const { data } = await worker.recognize(image);
           return data.text;
         } catch (error) {
+          if (workerPromise === currentWorkerPromise) {
+            workerPromise = undefined;
+          }
           await worker.terminate();
-          workerPromise = undefined;
           throw error;
         }
       }),

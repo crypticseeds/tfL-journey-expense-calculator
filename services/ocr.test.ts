@@ -38,4 +38,27 @@ describe("OCR worker lifecycle", () => {
     expect(worker.recognize).toHaveBeenCalledTimes(2);
     expect(worker.terminate).toHaveBeenCalledTimes(1);
   });
+
+  it("reacquires a worker for a queued call after recognition fails", async () => {
+    const replacementWorker = {
+      recognize: vi.fn().mockResolvedValue({ data: { text: "recovered" } }),
+      terminate: vi.fn().mockResolvedValue(undefined),
+    };
+    worker.recognize.mockRejectedValueOnce(new Error("recognition failed"));
+    createWorker
+      .mockResolvedValueOnce(worker)
+      .mockResolvedValueOnce(replacementWorker);
+    const { createOcrSession } = await import("./ocr");
+    const session = createOcrSession();
+
+    const failed = session.recognizeText({} as HTMLCanvasElement);
+    const recovered = session.recognizeText({} as HTMLCanvasElement);
+
+    await expect(failed).rejects.toThrow("recognition failed");
+    await expect(recovered).resolves.toBe("recovered");
+    await session.release();
+    expect(createWorker).toHaveBeenCalledTimes(2);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+    expect(replacementWorker.terminate).toHaveBeenCalledTimes(1);
+  });
 });

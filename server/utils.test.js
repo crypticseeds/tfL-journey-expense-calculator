@@ -1,28 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  LruCache,
-  createCacheKey,
-  createRateLimiter,
-  fetchWithRetry,
-} from "./utils";
+import { createRateLimiter, fetchWithRetry } from "./utils";
 
 describe("server utilities", () => {
-  it("evicts the least recently used response", () => {
-    const cache = new LruCache(2);
-    cache.set("a", 1);
-    cache.set("b", 2);
-    expect(cache.get("a")).toBe(1);
-    cache.set("c", 3);
-    expect(cache.get("b")).toBeUndefined();
-  });
-
-  it("creates a compact deterministic key", () => {
-    expect(createCacheKey({ model: "a" })).toBe(createCacheKey({ model: "a" }));
-    expect(createCacheKey({ model: "a" })).not.toBe(
-      createCacheKey({ model: "b" })
-    );
-  });
-
   it("retries retryable upstream responses", async () => {
     const fetchImpl = vi
       .fn()
@@ -51,7 +30,7 @@ describe("server utilities", () => {
       "https://example.test",
       {},
       {
-        attempts: 1,
+        attempts: 3,
         fetchImpl,
         timeoutMs: 10,
       }
@@ -62,6 +41,7 @@ describe("server utilities", () => {
 
     await vi.advanceTimersByTimeAsync(10);
     await rejection;
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
 

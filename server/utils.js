@@ -1,31 +1,3 @@
-import { createHash } from "node:crypto";
-
-export class LruCache {
-  constructor(maxEntries) {
-    this.maxEntries = maxEntries;
-    this.entries = new Map();
-  }
-
-  get(key) {
-    const value = this.entries.get(key);
-    if (value === undefined) return undefined;
-    this.entries.delete(key);
-    this.entries.set(key, value);
-    return value;
-  }
-
-  set(key, value) {
-    this.entries.delete(key);
-    this.entries.set(key, value);
-    while (this.entries.size > this.maxEntries) {
-      this.entries.delete(this.entries.keys().next().value);
-    }
-  }
-}
-
-export const createCacheKey = (value) =>
-  createHash("sha256").update(JSON.stringify(value)).digest("hex");
-
 export function createRateLimiter({
   windowMs,
   maxRequests,
@@ -87,7 +59,7 @@ export async function fetchWithRetry(
       if (attempt === attempts - 1) return response;
     } catch (error) {
       lastError = error;
-      if (attempt === attempts - 1) throw error;
+      if (error.name === "AbortError" || attempt === attempts - 1) throw error;
     } finally {
       clearTimeout(timeout);
     }
