@@ -232,13 +232,14 @@ const App: React.FC = () => {
             className="app-theme-toggle"
             onClick={() => setIsDark((wasDark) => !wasDark)}
             aria-pressed={isDark}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             {isDark ? (
-              <SunIcon className="w-4 h-4" />
+              <SunIcon className="w-6 h-6" />
             ) : (
-              <MoonIcon className="w-4 h-4" />
+              <MoonIcon className="w-6 h-6" />
             )}
-            {isDark ? "Light mode" : "Dark mode"}
           </button>
         </div>
       </header>
@@ -363,7 +364,7 @@ const App: React.FC = () => {
             with, endorsed by, or connected to Transport for London. Oyster and
             TfL are trademarks of Transport for London.
           </p>
-          <p className="app-flush">Built by Femi Akinlotan.</p>
+          <p className="app-flush">Built by Femi Akinlotan, 2026.</p>
           <ul className="app-footer__social">
             <li>
               <a
@@ -371,9 +372,10 @@ const App: React.FC = () => {
                 href="https://github.com/crypticseeds"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="GitHub"
+                title="GitHub"
               >
                 <GitHubIcon className="w-5 h-5" />
-                GitHub
               </a>
             </li>
             <li>
@@ -382,10 +384,10 @@ const App: React.FC = () => {
                 href="https://x.com/crypticseeds"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="X (formerly Twitter)"
+                title="X"
               >
                 <XIcon className="w-5 h-5" />
-                <span className="sr-only">X (formerly Twitter)</span>
-                <span aria-hidden="true">X</span>
               </a>
             </li>
           </ul>

@@ -47,7 +47,9 @@
   --space-8: 64px;
 
   /* Structure */
-  --content-width: 1080px;
+  /* Wide enough to use a laptop viewport rather than leaving large empty
+     gutters, still capped so body text does not run to unreadable lengths. */
+  --content-width: 1400px;
   --radius: 0;
   --target-min: 44px;
   --border-width: 1px;
@@ -258,7 +260,7 @@ input:focus-visible {
   gap: var(--space-2);
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
 }
 
 .app-masthead__title {
@@ -271,19 +273,19 @@ input:focus-visible {
   flex: 1 1 auto;
 }
 
+/* Icon only, no box or label: it sits in the masthead as a quiet control, so
+   it keeps the 44px touch target but shows nothing until hovered. */
 .app-theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: var(--target-min);
-  padding: 0 var(--space-2);
-  border: var(--border-width) solid var(--colour-on-accent);
+  justify-content: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  padding: 0;
+  border: none;
   border-radius: var(--radius);
   background-color: transparent;
   color: var(--colour-on-accent);
-  font: inherit;
-  font-size: var(--font-size-caption);
-  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -291,10 +293,14 @@ input:focus-visible {
   background-color: var(--colour-blue-dark);
 }
 
+/* width:100% matters: <main> is a flex item of #root, and a flex item with
+   auto side margins does not stretch, so without it the page collapsed to a
+   narrow fit-content column. */
 .app-container {
+  width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 var(--space-2);
+  padding: 0 var(--space-3);
 }
 
 .app-main {
@@ -326,6 +332,8 @@ input:focus-visible {
 .app-actions {
   display: flex;
   gap: var(--space-2);
+  /* Capped so the pair does not stretch across a wide desktop panel. */
+  max-width: 32rem;
   margin-top: var(--space-2);
 }
 
@@ -364,7 +372,7 @@ input:focus-visible {
 .app-service-strip__inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   color: var(--colour-ink-secondary);
   font-size: var(--font-size-caption);
 }
@@ -381,25 +389,40 @@ input:focus-visible {
 .app-footer__inner {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-2) var(--space-3);
   color: var(--colour-ink-secondary);
   font-size: var(--font-size-caption);
+  text-align: center;
+}
+
+.app-footer__inner p {
+  margin: 0;
+}
+
+.app-footer__inner p + p {
+  margin-top: var(--space-1);
 }
 
 .app-footer__social {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+  justify-content: center;
+  gap: var(--space-2);
   list-style: none;
-  margin: var(--space-2) 0 0;
+  margin: var(--space-1) 0 0;
   padding: 0;
 }
 
+/* Icon-only links, but still a full touch target. */
 .app-footer__social-link {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: var(--target-min);
+  justify-content: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  color: var(--colour-ink-secondary);
+}
+
+.app-footer__social-link:hover {
   color: var(--colour-link);
 }
 
@@ -517,15 +540,19 @@ input:focus-visible {
 }
 
 /* Upload */
+/* Upload: the button sits centred inside the dropzone with the drag hint
+   beneath it. Only the contents of the box are centred - the section around
+   it stays left-aligned with the rest of the page. */
 .app-upload {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  min-height: 200px;
   border: 2px dashed var(--colour-border-strong);
   background-color: var(--colour-white);
-  padding: var(--space-3);
+  padding: var(--space-4) var(--space-3);
   text-align: center;
 }
 
