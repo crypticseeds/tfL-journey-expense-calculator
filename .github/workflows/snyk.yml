@@ -33,5 +33,6 @@ jobs:
         uses: snyk/actions/node@master
         with:
           command: test
+          args: --all-projects
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
