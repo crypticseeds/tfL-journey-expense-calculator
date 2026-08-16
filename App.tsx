@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { TravelEntry, SummaryReportData } from "./types";
 import { extractTravelDataFromFile } from "./services/geminiService";
 import { startExpenseTrace } from "./services/langfuseService";
@@ -6,56 +6,13 @@ import FileUpload from "./components/FileUpload";
 import Calendar from "./components/Calendar";
 import SummaryReport from "./components/SummaryReport";
 import Loader from "./components/Loader";
-import { SunIcon, MoonIcon, StartOverIcon } from "./components/Icons";
+import { JourneyMarker, StartOverIcon } from "./components/Icons";
 
 interface LoadingState {
   active: boolean;
   message: string;
   progress: number;
 }
-
-const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme") as "light" | "dark";
-    }
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-      return "dark";
-    }
-    return "light";
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
-
-  return (
-    <button
-      onClick={toggleTheme}
-      className="p-2 rounded-full transition-colors hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-    >
-      {theme === "light" ? (
-        <MoonIcon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-      ) : (
-        <SunIcon className="w-5 h-5 text-yellow-500" />
-      )}
-    </button>
-  );
-};
 
 const App: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -68,6 +25,15 @@ const App: React.FC = () => {
     progress: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
+
+  // GOV.UK error summary pattern: when a problem appears, move focus to it so
+  // screen reader and keyboard users are told what went wrong.
+  useEffect(() => {
+    if (error) {
+      errorSummaryRef.current?.focus();
+    }
+  }, [error]);
 
   const handleFilesSelected = useCallback((selectedFiles: File[]) => {
     setFiles(selectedFiles);
@@ -266,121 +232,171 @@ const App: React.FC = () => {
     files.length > 0 || selectedDates.length > 0 || summary || error;
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-      <div className="absolute top-0 right-0 p-4">
-        <ThemeToggle />
+    <>
+      <header className="app-masthead">
+        <div className="app-masthead__inner">
+          <JourneyMarker className="w-8 h-8 shrink-0" />
+          <span className="app-masthead__title">Journey expenses</span>
+        </div>
+      </header>
+      <div className="app-service-strip">
+        <div className="app-service-strip__inner">
+          Work out what your TfL contactless and Oyster travel cost on the days
+          you commuted.
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto">
-        <header className="text-center my-12">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-            TFL Journey{" "}
-            <span className="bg-gradient-to-r from-sky-500 to-cyan-500 text-transparent bg-clip-text">
-              Expense Calculator
-            </span>
-          </h1>
-          <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Upload your TfL contactless & Oyster statements to automatically
-            calculate your journey expenses.
-          </p>
-        </header>
+      <main
+        className="app-container"
+        style={{ paddingBottom: "var(--space-8)" }}
+      >
+        <h1
+          style={{
+            fontSize: "var(--font-size-heading-l)",
+            paddingTop: "var(--space-5)",
+            maxWidth: "30ch",
+          }}
+        >
+          TfL journey expense calculator
+        </h1>
+        <p
+          style={{
+            maxWidth: "60ch",
+            fontSize: "var(--font-size-lead)",
+            color: "var(--colour-ink-secondary)",
+          }}
+        >
+          Upload your contactless and Oyster statements, tell us which days you
+          travelled for work, and get a dated breakdown you can put on an
+          expense claim.
+        </p>
 
-        {canReset && !loadingState.active && (
-          <div className="text-center mb-8 animate-fade-in">
-            <button
-              onClick={handleResetAll}
-              className="inline-flex items-center text-sm font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 transition-colors"
-              aria-label="Reset all fields and start over"
+        {error && (
+          <div
+            ref={errorSummaryRef}
+            tabIndex={-1}
+            role="alert"
+            aria-labelledby="error-summary-title"
+            style={{
+              border: "var(--border-width-thick) solid var(--colour-error)",
+              padding: "var(--space-2)",
+              marginTop: "var(--space-3)",
+              backgroundColor: "var(--colour-white)",
+            }}
+          >
+            <h2
+              id="error-summary-title"
+              style={{
+                fontSize: "var(--font-size-heading-s)",
+                color: "var(--colour-error)",
+              }}
             >
-              <StartOverIcon className="w-5 h-5 mr-2" />
-              Start Over
-            </button>
+              There is a problem
+            </h2>
+            <p style={{ marginBottom: 0 }}>{error}</p>
           </div>
         )}
 
-        <main className="space-y-12">
-          <section id="step-1" className="transition-opacity duration-500">
-            <h2 className="text-2xl font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center">
-              <span className="flex items-center justify-center w-8 h-8 mr-3 bg-sky-500 text-white rounded-full font-bold">
-                1
-              </span>
-              Upload TfL Statements
+        <section id="step-1" className="app-stage">
+          <h2 className="app-stage__heading">
+            <span className="app-stage__number">1</span>
+            Upload your statements
+          </h2>
+          <FileUpload
+            onFilesSelected={handleFilesSelected}
+            disabled={loadingState.active}
+          />
+        </section>
+
+        {hasFiles && (
+          <section id="step-2" className="app-stage">
+            <h2 className="app-stage__heading">
+              <span className="app-stage__number">2</span>
+              Select the days you travelled for work
             </h2>
-            <FileUpload
-              onFilesSelected={handleFilesSelected}
-              disabled={loadingState.active}
-            />
-          </section>
-
-          {hasFiles && (
-            <section id="step-2" className="animate-fade-in space-y-8">
-              <h2 className="text-2xl font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center">
-                <span className="flex items-center justify-center w-8 h-8 mr-3 bg-sky-500 text-white rounded-full font-bold">
-                  2
-                </span>
-                Select Workdays & Calculate
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                <Calendar
-                  selectedDates={selectedDates}
-                  onDateChange={handleDateChange}
-                  currentDate={currentCalendarDate}
-                  setCurrentDate={setCurrentCalendarDate}
-                />
-                <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                  <p className="text-slate-600 dark:text-slate-400 mb-6">
-                    Once your dates are selected, press the button to generate
-                    your expense report.
+            <div
+              style={{
+                display: "grid",
+                gap: "var(--space-4)",
+                gridTemplateColumns: "minmax(280px, 360px) minmax(0, 1fr)",
+                alignItems: "start",
+                paddingTop: "var(--space-3)",
+              }}
+            >
+              <Calendar
+                selectedDates={selectedDates}
+                onDateChange={handleDateChange}
+                currentDate={currentCalendarDate}
+                setCurrentDate={setCurrentCalendarDate}
+              />
+              <div>
+                <p
+                  style={{ marginTop: 0, color: "var(--colour-ink-secondary)" }}
+                >
+                  {selectedDates.length === 0
+                    ? "No days selected yet."
+                    : `${selectedDates.length} ${
+                        selectedDates.length === 1 ? "day" : "days"
+                      } selected.`}
+                </p>
+                <button
+                  type="button"
+                  className="app-button"
+                  onClick={processExpenses}
+                  disabled={
+                    loadingState.active ||
+                    files.length === 0 ||
+                    selectedDates.length === 0
+                  }
+                >
+                  {loadingState.active ? "Calculating" : "Calculate expenses"}
+                </button>
+                {canReset && !loadingState.active && (
+                  <p style={{ marginBottom: 0 }}>
+                    <button
+                      type="button"
+                      onClick={handleResetAll}
+                      className="app-button app-button--secondary"
+                      style={{ marginTop: "var(--space-2)" }}
+                    >
+                      <StartOverIcon className="w-4 h-4 mr-2" />
+                      Start again
+                    </button>
                   </p>
-                  <button
-                    onClick={processExpenses}
-                    disabled={
-                      loadingState.active ||
-                      files.length === 0 ||
-                      selectedDates.length === 0
-                    }
-                    className="w-full max-w-xs bg-gradient-to-r from-sky-600 to-cyan-600 text-white font-bold py-4 px-6 rounded-lg hover:shadow-xl hover:scale-105 disabled:from-gray-400 disabled:to-gray-400 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed disabled:scale-100 transition-all duration-300 ease-in-out text-lg shadow-lg"
-                  >
-                    {loadingState.active ? "Analyzing..." : "Generate Report"}
-                  </button>
-                </div>
+                )}
               </div>
-            </section>
-          )}
-
-          <section id="step-3-summary">
-            <div className="relative min-h-[200px] flex items-center justify-center">
-              {loadingState.active && (
-                <Loader
-                  message={loadingState.message}
-                  progress={loadingState.progress}
-                />
-              )}
-              {error && (
-                <div className="text-center text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 p-4 rounded-lg animate-fade-in w-full">
-                  <p className="font-semibold">An Error Occurred</p>
-                  <p className="text-sm">{error}</p>
-                </div>
-              )}
-              {!loadingState.active && !error && summary && (
-                <SummaryReport data={summary} />
-              )}
-              {!loadingState.active && !error && !summary && hasFiles && (
-                <div className="text-center text-slate-500 dark:text-slate-400 animate-fade-in">
-                  <p>Select your workdays on the calendar to proceed.</p>
-                </div>
-              )}
             </div>
           </section>
-        </main>
+        )}
 
-        <footer className="mt-16 mb-8 text-center">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Built with ❤️ by Femi Akinlotan + 🤖
+        <section id="step-3-summary" className="app-stage">
+          {loadingState.active && (
+            <Loader
+              message={loadingState.message}
+              progress={loadingState.progress}
+            />
+          )}
+          {!loadingState.active && summary && <SummaryReport data={summary} />}
+          {!loadingState.active && !summary && hasFiles && (
+            <p style={{ color: "var(--colour-ink-secondary)" }}>
+              Your expense report will appear here once you have selected your
+              workdays and calculated.
+            </p>
+          )}
+        </section>
+      </main>
+
+      <footer className="app-footer">
+        <div className="app-footer__inner">
+          <p>
+            This is not a Transport for London service. It is not affiliated
+            with, endorsed by, or connected to Transport for London. Oyster and
+            TfL are trademarks of Transport for London.
           </p>
-        </footer>
-      </div>
-    </div>
+          <p style={{ marginBottom: 0 }}>Built by Femi Akinlotan.</p>
+        </div>
+      </footer>
+    </>
   );
 };
 

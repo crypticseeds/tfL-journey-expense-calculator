@@ -14,7 +14,16 @@ const Calendar: React.FC<CalendarProps> = ({
   currentDate,
   setCurrentDate,
 }) => {
-  const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"];
+  // Monday-first, as UK calendars are printed.
+  const daysOfWeek = [
+    { key: "mon", label: "Mo" },
+    { key: "tue", label: "Tu" },
+    { key: "wed", label: "We" },
+    { key: "thu", label: "Th" },
+    { key: "fri", label: "Fr" },
+    { key: "sat", label: "Sa" },
+    { key: "sun", label: "Su" },
+  ];
 
   const firstDayOfMonth = new Date(
     currentDate.getFullYear(),
@@ -27,7 +36,8 @@ const Calendar: React.FC<CalendarProps> = ({
     0
   );
   const daysInMonth = lastDayOfMonth.getDate();
-  const startingDay = firstDayOfMonth.getDay();
+  // getDay() is Sunday-first; shift so Monday is column 0.
+  const startingDay = (firstDayOfMonth.getDay() + 6) % 7;
 
   const isSameDay = (d1: Date, d2: Date) =>
     d1.getFullYear() === d2.getFullYear() &&
@@ -76,63 +86,82 @@ const Calendar: React.FC<CalendarProps> = ({
     const isToday = isSameDay(new Date(), date);
 
     calendarDays.push(
-      <div key={day} className="flex items-center justify-center">
-        <button
-          onClick={() => toggleDate(day)}
-          className={`w-9 h-9 flex items-center justify-center text-sm rounded-full transition-all duration-200
-            ${
-              isSelected
-                ? "bg-sky-600 text-white font-semibold shadow-md hover:bg-sky-700"
-                : isToday
-                  ? "bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-200 font-semibold"
-                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-        >
-          {day}
-        </button>
-      </div>
+      <button
+        key={day}
+        type="button"
+        onClick={() => toggleDate(day)}
+        aria-pressed={isSelected}
+        className={`app-calendar__day${
+          isSelected
+            ? " app-calendar__day--selected"
+            : isToday
+              ? " app-calendar__day--today"
+              : ""
+        }`}
+      >
+        <span className="sr-only">
+          {date.toLocaleDateString("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+        <span aria-hidden="true">{day}</span>
+      </button>
     );
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white/50 dark:bg-slate-800/40 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 backdrop-blur-lg">
-      <div className="flex items-center justify-between mb-4">
+    <div className="app-calendar">
+      <div className="app-calendar__header">
         <button
+          type="button"
           onClick={prevMonth}
-          className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="app-calendar__nav"
+          aria-label="Previous month"
         >
-          <ChevronLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <ChevronLeftIcon className="w-5 h-5" />
         </button>
-        <h2 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
-          {currentDate.toLocaleString("default", {
+        <h3 className="app-calendar__month" aria-live="polite">
+          {currentDate.toLocaleString("en-GB", {
             month: "long",
             year: "numeric",
           })}
-        </h2>
+        </h3>
         <button
+          type="button"
           onClick={nextMonth}
-          className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="app-calendar__nav"
+          aria-label="Next month"
         >
-          <ChevronRightIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <ChevronRightIcon className="w-5 h-5" />
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
+      <div className="app-calendar__grid">
         {daysOfWeek.map((day) => (
-          <div key={day}>{day}</div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-y-1">{calendarDays}</div>
-      {selectedDates.length > 0 && (
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={() => onDateChange([])}
-            className="flex items-center text-sm font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 transition-colors"
-            aria-label="Clear selected dates"
+          <div
+            key={day.key}
+            className="app-calendar__weekday"
+            aria-hidden="true"
           >
-            <TrashIcon className="w-4 h-4 mr-1.5" />
-            Clear Selection
+            {day.label}
+          </div>
+        ))}
+        {calendarDays}
+      </div>
+      {selectedDates.length > 0 && (
+        <p style={{ marginBottom: 0 }}>
+          <button
+            type="button"
+            onClick={() => onDateChange([])}
+            className="app-button app-button--secondary"
+            style={{ marginTop: "var(--space-2)" }}
+          >
+            <TrashIcon className="w-4 h-4 mr-2" />
+            Clear selected days
           </button>
-        </div>
+        </p>
       )}
     </div>
   );
