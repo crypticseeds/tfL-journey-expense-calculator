@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  protobufjs: true
+  tesseract.js: true
+
+overrides:
+  jws: 4.0.1
