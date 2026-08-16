@@ -364,33 +364,35 @@ const App: React.FC = () => {
             with, endorsed by, or connected to Transport for London. Oyster and
             TfL are trademarks of Transport for London.
           </p>
-          <p className="app-flush">Built by Femi Akinlotan, 2026.</p>
-          <ul className="app-footer__social">
-            <li>
-              <a
-                className="app-footer__social-link"
-                href="https://github.com/crypticseeds"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                title="GitHub"
-              >
-                <GitHubIcon className="w-5 h-5" />
-              </a>
-            </li>
-            <li>
-              <a
-                className="app-footer__social-link"
-                href="https://x.com/crypticseeds"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (formerly Twitter)"
-                title="X"
-              >
-                <XIcon className="w-5 h-5" />
-              </a>
-            </li>
-          </ul>
+          <div className="app-footer__byline">
+            <p className="app-flush">Built by Femi Akinlotan, 2026.</p>
+            <ul className="app-footer__social">
+              <li>
+                <a
+                  className="app-footer__social-link"
+                  href="https://github.com/crypticseeds"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  title="GitHub"
+                >
+                  <GitHubIcon className="w-5 h-5" />
+                </a>
+              </li>
+              <li>
+                <a
+                  className="app-footer__social-link"
+                  href="https://x.com/crypticseeds"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (formerly Twitter)"
+                  title="X"
+                >
+                  <XIcon className="w-5 h-5" />
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </footer>
     </>
