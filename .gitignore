@@ -39,7 +39,11 @@ doppler.toml
 *secret*
 *credential*
 *password*
-*token*
+*.token
+*access-token*
+*auth-token*
+*refresh-token*
+*api-token*
 *api-key*
 *apikey*
 secrets/

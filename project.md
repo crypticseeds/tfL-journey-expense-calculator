@@ -117,21 +117,8 @@ pnpm install
 
 #### Environment Configuration
 
-Create a `.env` file:
-
-```env
-# Required: Google Gemini API Key
-GEMINI_API_KEY=your-gemini-api-key-here
-
-# Optional: Langfuse for AI observability (recommended)
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com
-
-# Backend configuration
-PORT=3001
-FRONTEND_ORIGIN=http://localhost:3000
-```
+Run `doppler setup`, then configure `GEMINI_API_KEY` and the optional Langfuse
+keys in the selected Doppler project and config.
 
 #### Running the Application
 

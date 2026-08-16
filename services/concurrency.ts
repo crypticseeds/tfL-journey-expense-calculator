@@ -10,18 +10,30 @@ export async function runWithConcurrency<T>(
   const results = new Array<T>(tasks.length);
   let nextIndex = 0;
   let completed = 0;
+  let failed = false;
 
   async function worker() {
-    while (nextIndex < tasks.length) {
+    while (!failed && nextIndex < tasks.length) {
       const index = nextIndex++;
-      results[index] = await tasks[index]();
-      completed++;
-      onComplete?.(completed, tasks.length);
+      try {
+        results[index] = await tasks[index]();
+        completed++;
+        onComplete?.(completed, tasks.length);
+      } catch (error) {
+        failed = true;
+        throw error;
+      }
     }
   }
 
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, tasks.length) }, () => worker())
+  const workers = Array.from(
+    { length: Math.min(concurrency, tasks.length) },
+    () => worker()
   );
+  const settledWorkers = await Promise.allSettled(workers);
+  const failedWorker = settledWorkers.find(
+    (result): result is PromiseRejectedResult => result.status === "rejected"
+  );
+  if (failedWorker) throw failedWorker.reason;
   return results;
 }

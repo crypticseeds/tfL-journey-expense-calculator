@@ -2,6 +2,7 @@ import { Type } from "@google/genai";
 import { TravelEntry } from "../types";
 import { traceGeminiCall, traceFileProcessing } from "./langfuseService";
 import { runWithConcurrency } from "./concurrency";
+import { createOcrSession } from "./ocr";
 
 // File reading utilities
 const readFileAsBase64 = (file: File): Promise<string> => {
@@ -280,6 +281,10 @@ export function mergeEntriesByMaxCount(
   return result;
 }
 
+export function mergeDisjointChunks(chunks: TravelEntry[][]): TravelEntry[] {
+  return chunks.flat();
+}
+
 // CSV parser for daily totals: expects lines with date and total; accepts multiple date formats and £
 export function parseCsvToTravelEntries(text: string): TravelEntry[] {
   const lines = text
@@ -408,7 +413,7 @@ This is a CHUNK of a larger document. Extract EVERY individual journey charge fr
 
 CRITICAL:
 - Dates are often printed once followed by multiple journey lines; subsequent journeys inherit the most recent date header until a new date appears.
-- If this chunk starts without a date header, journeys may inherit dates from the previous chunk (this is handled during merging).
+- If this chunk starts without a date header, use the preceding context supplied before the chunk to inherit its date.
 - Output date as YYYY-MM-DD. Output amount as a positive number (no currency symbols).
 - Strictly IGNORE non-journey lines: any line containing (case-insensitive): cap, capped, daily cap, weekly cap, total, payment, auto top up, auto topup, refund, credit, adjustment.
 - Do NOT output daily or weekly totals; only individual journeys.
@@ -417,9 +422,24 @@ Return ONLY JSON in this schema:
 { "expenses": [ { "date": "YYYY-MM-DD", "amount": 0.00 }, ... ] }
 `;
 
+export function addPreviousPageContext(
+  pageTexts: string[],
+  pagesPerChunk: number
+): Array<{ context?: string; pages: string[] }> {
+  const chunks: Array<{ context?: string; pages: string[] }> = [];
+  for (let start = 0; start < pageTexts.length; start += pagesPerChunk) {
+    chunks.push({
+      context: start === 0 ? undefined : pageTexts[start - 1],
+      pages: pageTexts.slice(start, start + pagesPerChunk),
+    });
+  }
+  return chunks;
+}
+
 // Process a single PDF chunk (2-4 pages) through Gemini
 async function processPdfChunk(
   pages: string[],
+  previousPageContext: string | undefined,
   chunkIndex: number,
   totalChunks: number,
   model: string,
@@ -432,6 +452,9 @@ async function processPdfChunk(
   }
 ): Promise<TravelEntry[]> {
   const chunkText = pages.join("\n\n");
+  const contextInstruction = previousPageContext
+    ? `\n\nPRECEDING PAGE FOR DATE CONTEXT ONLY. Do not extract or output journeys from this section:\n${previousPageContext}\n\nCURRENT CHUNK TO EXTRACT:\n`
+    : "\n\nCURRENT CHUNK TO EXTRACT:\n";
   const chunkPrompt =
     totalChunks > 1
       ? `${CHUNK_PROMPT}\n\nThis is chunk ${chunkIndex + 1} of ${totalChunks} from the document.`
@@ -447,7 +470,10 @@ async function processPdfChunk(
       return await generateContent({
         model: model,
         contents: {
-          parts: [{ text: chunkPrompt }, { text: chunkText }],
+          parts: [
+            { text: `${chunkPrompt}${contextInstruction}` },
+            { text: chunkText },
+          ],
         },
         config: {
           responseMimeType: "application/json",
@@ -514,7 +540,7 @@ export const extractTravelDataFromFile = async (
       ) => { update: (data: unknown) => void; end: () => void };
     }) => {
       try {
-        const model = "gemini-2.5-flash-lite";
+        const model = "gemini-3.1-flash-lite";
         let contents;
         let rawTextForFallback = "";
 
@@ -548,51 +574,51 @@ export const extractTravelDataFromFile = async (
           const arrayBuffer = await readFileAsArrayBuffer(file);
           const pdf = await getDocument({ data: arrayBuffer }).promise;
 
-          // Read all pages first
-          const pageTexts: string[] = [];
-          for (let i = 1; i <= pdf.numPages; i++) {
-            onProgressUpdate(`Reading PDF page ${i} of ${pdf.numPages}...`);
-            const page = await pdf.getPage(i);
-
-            const textContent = await page.getTextContent();
-            let pageText = rebuildPageTextWithLineBreaks(
-              textContent as {
-                items?: Array<{
-                  str?: string;
-                  transform?: number[];
-                  matrix?: number[];
-                }>;
-              }
-            );
-
-            // If text is sparse, assume it's an image and use OCR
-            if (pageText.trim().length < 100) {
+          // Read and render pages in parallel. A single reused OCR worker queues
+          // sparse-page recognition while other pages continue preparing.
+          const ocr = createOcrSession();
+          const pageTasks = Array.from({ length: pdf.numPages }, (_, index) => {
+            const pageNumber = index + 1;
+            return async () => {
               onProgressUpdate(
-                `Page ${i} appears image-based. Starting OCR...`
+                `Reading PDF page ${pageNumber} of ${pdf.numPages}...`
               );
-              const viewport = page.getViewport({ scale: 2.0 });
-              const canvas = document.createElement("canvas");
-              const context = canvas.getContext("2d");
-              canvas.height = viewport.height;
-              canvas.width = viewport.width;
+              const page = await pdf.getPage(pageNumber);
 
-              await page.render({ canvasContext: context, viewport }).promise;
+              const textContent = await page.getTextContent();
+              let pageText = rebuildPageTextWithLineBreaks(
+                textContent as {
+                  items?: Array<{
+                    str?: string;
+                    transform?: number[];
+                    matrix?: number[];
+                  }>;
+                }
+              );
 
-              const { default: Tesseract } = await import("tesseract.js");
-              const {
-                data: { text },
-              } = await Tesseract.recognize(canvas, "eng", {
-                logger: (m: { status?: string; progress?: number }) => {
-                  if (m.status === "recognizing text") {
-                    onProgressUpdate(
-                      `OCR on page ${i}: ${Math.round((m.progress || 0) * 100)}% complete`
-                    );
-                  }
-                },
-              });
-              pageText = text;
-            }
-            pageTexts.push(pageText);
+              if (pageText.trim().length < 100) {
+                onProgressUpdate(
+                  `Page ${pageNumber} appears image-based. Starting OCR...`
+                );
+                const viewport = page.getViewport({ scale: 2.0 });
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport }).promise;
+                pageText = await ocr.recognizeText(canvas);
+                onProgressUpdate(`OCR on page ${pageNumber} complete.`);
+              }
+
+              return pageText;
+            };
+          });
+          let pageTexts: string[];
+          try {
+            pageTexts = await runWithConcurrency(pageTasks, 3);
+          } finally {
+            await ocr.release();
           }
 
           rawTextForFallback = pageTexts.join("\n\n");
@@ -609,10 +635,7 @@ export const extractTravelDataFromFile = async (
             pagesPerChunk = 4; // 4 pages per chunk for large PDFs
           }
 
-          const chunks: string[][] = [];
-          for (let i = 0; i < pageTexts.length; i += pagesPerChunk) {
-            chunks.push(pageTexts.slice(i, i + pagesPerChunk));
-          }
+          const chunks = addPreviousPageContext(pageTexts, pagesPerChunk);
 
           // Process chunks in parallel (limit to 3 concurrent)
           onProgressUpdate(
@@ -620,9 +643,10 @@ export const extractTravelDataFromFile = async (
           );
 
           const chunkTasks = chunks.map(
-            (chunkPages, chunkIndex) => () =>
+            (chunk, chunkIndex) => () =>
               processPdfChunk(
-                chunkPages,
+                chunk.pages,
+                chunk.context,
                 chunkIndex,
                 chunks.length,
                 model,
@@ -639,15 +663,7 @@ export const extractTravelDataFromFile = async (
           );
 
           // Merge all chunk results
-          let mergedEntries: TravelEntry[] = [];
-          for (const chunkEntries of chunkResults) {
-            if (chunkEntries.length > 0) {
-              mergedEntries = mergeEntriesByMaxCount(
-                mergedEntries,
-                chunkEntries
-              );
-            }
-          }
+          let mergedEntries = mergeDisjointChunks(chunkResults);
 
           // Apply heuristic fallback and return
           if (rawTextForFallback) {

@@ -93,19 +93,10 @@ _Langfuse trace revealing document processing bottlenecks, leading to 78.5% late
    pnpm install
    ```
 
-2. **Configure environment**:
+2. **Configure secrets with Doppler**:
 
-   Create a `.env` file:
-
-   ```bash
-   # Required: Google Gemini API Key
-   GEMINI_API_KEY=your-gemini-api-key-here
-
-   # Optional: Langfuse for AI observability (recommended)
-   LANGFUSE_PUBLIC_KEY=pk-lf-...
-   LANGFUSE_SECRET_KEY=sk-lf-...
-   LANGFUSE_BASE_URL=https://cloud.langfuse.com
-   ```
+   Run `doppler setup`, then configure `GEMINI_API_KEY` and the optional
+   Langfuse keys in the selected Doppler project and config.
 
 3. **Run the application**:
 
@@ -184,7 +175,7 @@ This project showcases **production-grade AI monitoring** using Langfuse:
 
 1. Sign up for free at [cloud.langfuse.com](https://cloud.langfuse.com)
 2. Get your API keys from the dashboard
-3. Add them to your `.env` file
+3. Add them to your Doppler project and config
 4. View traces in real-time as you use the app
 
 ## 🔒 Security
